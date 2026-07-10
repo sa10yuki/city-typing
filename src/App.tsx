@@ -1,0 +1,90 @@
+import { useCallback, useRef, useState } from "react";
+import Home from "./components/Home";
+import PlayScreen, { type MuniResult, type RunResult } from "./components/PlayScreen";
+import ResultScreen from "./components/ResultScreen";
+import { loadSave, persistSave, type SaveData } from "./lib/storage";
+
+type View =
+  | { t: "home" }
+  | { t: "play"; prefId: number; runKey: number }
+  | { t: "result"; result: RunResult; isBest: boolean; best: number };
+
+export default function App() {
+  const [save, setSave] = useState<SaveData>(loadSave);
+  const [view, setView] = useState<View>({ t: "home" });
+  const runKeyRef = useRef(0);
+
+  const update = useCallback((updater: (d: SaveData) => SaveData) => {
+    setSave((prev) => {
+      const next = updater(prev);
+      persistSave(next);
+      return next;
+    });
+  }, []);
+
+  const handleMuniCleared = useCallback(
+    (r: MuniResult) => {
+      update((d) => {
+        const stat = d.muniStats[r.code] ?? { miss: 0, clears: 0, totalMs: 0 };
+        return {
+          ...d,
+          cleared: { ...d.cleared, [r.code]: 1 as const },
+          muniStats: {
+            ...d.muniStats,
+            [r.code]: {
+              miss: stat.miss + r.miss,
+              clears: stat.clears + 1,
+              totalMs: stat.totalMs + r.ms,
+            },
+          },
+        };
+      });
+    },
+    [update]
+  );
+
+  const handleFinish = useCallback(
+    (r: RunResult) => {
+      const prevBest = save.prefBest[r.prefId];
+      const isBest = prevBest === undefined || r.totalMs < prevBest;
+      if (isBest) {
+        update((d) => ({
+          ...d,
+          prefBest: { ...d.prefBest, [r.prefId]: r.totalMs },
+        }));
+      }
+      setView({ t: "result", result: r, isBest, best: isBest ? r.totalMs : prevBest! });
+    },
+    [save.prefBest, update]
+  );
+
+  const startPlay = useCallback((prefId: number) => {
+    runKeyRef.current += 1;
+    setView({ t: "play", prefId, runKey: runKeyRef.current });
+  }, []);
+
+  return (
+    <div className="app">
+      {view.t === "home" && <Home save={save} onSelectPref={startPlay} />}
+      {view.t === "play" && (
+        <PlayScreen
+          key={view.runKey}
+          prefId={view.prefId}
+          clearedAll={save.cleared}
+          onMuniCleared={handleMuniCleared}
+          onFinish={handleFinish}
+          onQuit={() => setView({ t: "home" })}
+        />
+      )}
+      {view.t === "result" && (
+        <ResultScreen
+          result={view.result}
+          isBest={view.isBest}
+          best={view.best}
+          onRetry={() => startPlay(view.result.prefId)}
+          onHome={() => setView({ t: "home" })}
+        />
+      )}
+    </div>
+  );
+}
