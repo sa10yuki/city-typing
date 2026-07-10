@@ -29,17 +29,41 @@ for (const r of gov) {
 }
 prefs.sort((a, b) => a.id - b.id);
 
-const munis = muniRows.map((r) => ({
-  c: r.lgcode.slice(0, 5), // 5桁コード（チェックディジット除く）
-  n: r.city,
-  k: r.citykana.replace(/\s+/g, ""),
-  p: Number(r.pid),
-}));
+// 接尾辞（市・町・村・区）を漢字と読みの両方から取り除く
+// 町=まち/ちょう、村=むら/そん は自治体ごとに読みが違うため末尾照合で判定する
+const SUFFIX_KANA = { 市: ["し"], 町: ["ちょう", "まち"], 村: ["むら", "そん"], 区: ["く"] };
+function stripSuffix(name, kana) {
+  const last = name.at(-1);
+  const cands = SUFFIX_KANA[last];
+  if (cands) {
+    for (const s of cands) {
+      if (kana.endsWith(s)) {
+        return { b: name.slice(0, -1), bk: kana.slice(0, -s.length) };
+      }
+    }
+  }
+  console.warn(`接尾辞を除去できない: ${name} = ${kana}`);
+  return { b: name, bk: kana };
+}
+
+const munis = muniRows.map((r) => {
+  const n = r.city;
+  const k = r.citykana.replace(/\s+/g, "");
+  const { b, bk } = stripSuffix(n, k);
+  return {
+    c: r.lgcode.slice(0, 5), // 5桁コード（チェックディジット除く）
+    n, // 正式名（例: 札幌市）
+    k, // 正式読み（例: さっぽろし）
+    b, // 出題用の名前（例: 札幌）
+    bk, // 出題用の読み（例: さっぽろ）
+    p: Number(r.pid),
+  };
+});
 
 // 読みに想定外の文字が入っていないか検査（ローマ字エンジンの対応範囲チェック）
 const kanaOk =
   /^[ぁ-んー]+$/;
-const bad = munis.filter((m) => !kanaOk.test(m.k));
+const bad = munis.filter((m) => !kanaOk.test(m.k) || !kanaOk.test(m.bk));
 if (bad.length) {
   console.warn("想定外の読み文字:", bad.map((m) => `${m.n}=${m.k}`).join(", "));
 }

@@ -5,8 +5,8 @@
 const BASE: Record<string, string[]> = {
   あ: ["a"], い: ["i", "yi"], う: ["u", "wu", "whu"], え: ["e"], お: ["o"],
   か: ["ka", "ca"], き: ["ki"], く: ["ku", "cu", "qu"], け: ["ke"], こ: ["ko", "co"],
-  さ: ["sa"], し: ["si", "shi", "ci"], す: ["su"], せ: ["se", "ce"], そ: ["so"],
-  た: ["ta"], ち: ["ti", "chi"], つ: ["tu", "tsu"], て: ["te"], と: ["to"],
+  さ: ["sa"], し: ["shi", "si", "ci"], す: ["su"], せ: ["se", "ce"], そ: ["so"],
+  た: ["ta"], ち: ["chi", "ti"], つ: ["tsu", "tu"], て: ["te"], と: ["to"],
   な: ["na"], に: ["ni"], ぬ: ["nu"], ね: ["ne"], の: ["no"],
   は: ["ha"], ひ: ["hi"], ふ: ["fu", "hu"], へ: ["he"], ほ: ["ho"],
   ま: ["ma"], み: ["mi"], む: ["mu"], め: ["me"], も: ["mo"],
@@ -14,7 +14,7 @@ const BASE: Record<string, string[]> = {
   ら: ["ra"], り: ["ri"], る: ["ru"], れ: ["re"], ろ: ["ro"],
   わ: ["wa"], ゐ: ["wi"], ゑ: ["we"], を: ["wo"],
   が: ["ga"], ぎ: ["gi"], ぐ: ["gu"], げ: ["ge"], ご: ["go"],
-  ざ: ["za"], じ: ["zi", "ji"], ず: ["zu"], ぜ: ["ze"], ぞ: ["zo"],
+  ざ: ["za"], じ: ["ji", "zi"], ず: ["zu"], ぜ: ["ze"], ぞ: ["zo"],
   だ: ["da"], ぢ: ["di"], づ: ["du"], で: ["de"], ど: ["do"],
   ば: ["ba"], び: ["bi"], ぶ: ["bu"], べ: ["be"], ぼ: ["bo"],
   ぱ: ["pa"], ぴ: ["pi"], ぷ: ["pu"], ぺ: ["pe"], ぽ: ["po"],
@@ -26,8 +26,8 @@ const BASE: Record<string, string[]> = {
 
 const DIGRAPH: Record<string, string[]> = {
   きゃ: ["kya"], きゅ: ["kyu"], きょ: ["kyo"],
-  しゃ: ["sya", "sha"], しゅ: ["syu", "shu"], しょ: ["syo", "sho"],
-  ちゃ: ["tya", "cha", "cya"], ちゅ: ["tyu", "chu", "cyu"], ちょ: ["tyo", "cho", "cyo"],
+  しゃ: ["sha", "sya"], しゅ: ["shu", "syu"], しょ: ["sho", "syo"],
+  ちゃ: ["cha", "tya", "cya"], ちゅ: ["chu", "tyu", "cyu"], ちょ: ["cho", "tyo", "cyo"],
   にゃ: ["nya"], にゅ: ["nyu"], にょ: ["nyo"],
   ひゃ: ["hya"], ひゅ: ["hyu"], ひょ: ["hyo"],
   みゃ: ["mya"], みゅ: ["myu"], みょ: ["myo"],
@@ -39,7 +39,7 @@ const DIGRAPH: Record<string, string[]> = {
   ぢゃ: ["dya"], ぢゅ: ["dyu"], ぢょ: ["dyo"],
   うぃ: ["wi"], うぇ: ["we"],
   ふぁ: ["fa"], ふぃ: ["fi"], ふぇ: ["fe"], ふぉ: ["fo"],
-  しぇ: ["sye", "she"], ちぇ: ["tye", "che"], じぇ: ["je", "zye"],
+  しぇ: ["she", "sye"], ちぇ: ["che", "tye"], じぇ: ["je", "zye"],
   てぃ: ["thi"], でぃ: ["dhi"], でゅ: ["dhu"],
 };
 
@@ -119,6 +119,7 @@ export class TypingChallenge {
   readonly units: Unit[];
   private ui = 0;
   private typed = "";
+  private doneText = "";
   private alive: string[];
 
   constructor(kana: string) {
@@ -142,6 +143,19 @@ export class TypingChallenge {
     return this.finished ? "" : this.units[this.ui].kana;
   }
 
+  /** 打鍵済みの表示用ローマ字（実際に打った文字をそのまま反映） */
+  get romajiDone(): string {
+    return this.doneText + this.typed;
+  }
+
+  /** これから打つ表示用ローマ字（現在ユニットは生存候補の先頭に追従） */
+  get romajiRest(): string {
+    if (this.finished) return "";
+    const currentRest = this.alive[0].slice(this.typed.length);
+    const upcoming = this.units.slice(this.ui + 1).map((u) => u.cands[0]).join("");
+    return currentRest + upcoming;
+  }
+
   input(ch: string): InputResult {
     if (this.finished) return "done";
     const next = this.alive.filter((c) => c[this.typed.length] === ch);
@@ -149,6 +163,7 @@ export class TypingChallenge {
     this.typed += ch;
     if (next.some((c) => c.length === this.typed.length)) {
       // ユニット完了
+      this.doneText += this.typed;
       this.ui += 1;
       this.typed = "";
       if (this.finished) return "done";

@@ -8,10 +8,14 @@ export interface Pref {
 export interface Muni {
   /** 5桁の市区町村コード */
   c: string;
-  /** 表示名（例: 札幌市） */
+  /** 正式名（例: 札幌市） */
   n: string;
-  /** ひらがな読み（例: さっぽろし） */
+  /** 正式読み（例: さっぽろし） */
   k: string;
+  /** 出題用の名前・接尾辞なし（例: 札幌） */
+  b: string;
+  /** 出題用の読み・接尾辞なし（例: さっぽろ） */
+  bk: string;
   /** 都道府県ID 1-47 */
   p: number;
 }

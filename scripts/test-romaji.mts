@@ -64,15 +64,17 @@ ok("はっちょうめ", "hattyoume"); // 架空だが判定確認
 ok("はっちょうめ", "hacchoume");
 ng("さっぽろし", "sakporosi"); // 促音の子音は次と同じもののみ
 
-// 全市区町村の読みがパースできるか
+// 全市区町村の読み（正式・出題用の両方）がパースできるか
 const data = JSON.parse(readFileSync(new URL("../src/data/municipalities.json", import.meta.url), "utf8"));
 let parseErrors = 0;
 for (const m of data.munis) {
-  try {
-    parseKana(m.k);
-  } catch (e) {
-    parseErrors++;
-    console.log(`パース不可: ${m.n} = ${m.k} (${(e as Error).message})`);
+  for (const kana of [m.k, m.bk]) {
+    try {
+      parseKana(kana);
+    } catch (e) {
+      parseErrors++;
+      console.log(`パース不可: ${m.n} = ${kana} (${(e as Error).message})`);
+    }
   }
 }
 console.log(`parse check: ${data.munis.length - parseErrors}/${data.munis.length} OK`);

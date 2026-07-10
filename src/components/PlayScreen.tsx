@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { munisByPref, prefName, shuffle, type Muni } from "../lib/data";
 import { TypingChallenge } from "../lib/romaji";
+import { playMiss, playType } from "../lib/sound";
 import { formatMs } from "../lib/storage";
 import MuniMap from "./MuniMap";
 
@@ -51,7 +52,7 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
   const [missFlash, setMissFlash] = useState(false);
 
   if (challengeRef.current === null && queue.length > 0) {
-    challengeRef.current = new TypingChallenge(queue[0].k);
+    challengeRef.current = new TypingChallenge(queue[0].bk);
   }
 
   const handleKey = useCallback(
@@ -79,6 +80,7 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
 
       const res = challenge.input(ch);
       if (res === "miss") {
+        playMiss();
         missTotalRef.current += 1;
         qMissRef.current += 1;
         setMissFlash(true);
@@ -86,6 +88,7 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
         setTick((t) => t + 1);
         return;
       }
+      playType();
       keysRef.current += 1;
       if (res === "done") {
         const r: MuniResult = {
@@ -101,7 +104,7 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
         qStartRef.current = now;
         const next = queue[idxRef.current];
         if (next) {
-          challengeRef.current = new TypingChallenge(next.k);
+          challengeRef.current = new TypingChallenge(next.bk);
         } else {
           finishedRef.current = true;
           onFinish({
@@ -166,11 +169,15 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
           {!started && <p className="hint">キーを打つとスタート！</p>}
           {current && (
             <>
-              <div className="q-name">{current.n}</div>
+              <div className="q-name">{current.b}</div>
               <div className="q-kana">
-                <span className="kana-done">{current.k.slice(0, kanaDone)}</span>
-                <span className="kana-current">{current.k.slice(kanaDone, kanaDone + curLen)}</span>
-                <span className="kana-rest">{current.k.slice(kanaDone + curLen)}</span>
+                <span className="kana-done">{current.bk.slice(0, kanaDone)}</span>
+                <span className="kana-current">{current.bk.slice(kanaDone, kanaDone + curLen)}</span>
+                <span className="kana-rest">{current.bk.slice(kanaDone + curLen)}</span>
+              </div>
+              <div className="q-romaji">
+                <span className="romaji-done">{challenge?.romajiDone}</span>
+                <span className="romaji-rest">{challenge?.romajiRest}</span>
               </div>
             </>
           )}
