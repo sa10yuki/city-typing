@@ -1,4 +1,5 @@
 // Web Audio APIで合成するタイプ音（音声ファイル不要）
+import { getSettings } from "./settings";
 
 let ctx: AudioContext | null = null;
 
@@ -20,6 +21,8 @@ function noise(c: AudioContext): AudioBuffer {
 
 /** 正打鍵音: 低めの「コッ」という打鍵音（ピッチ急降下サイン＋アタックノイズ） */
 export function playType(): void {
+  const { typeSound, typeVolume } = getSettings();
+  if (!typeSound) return;
   try {
     const c = audio();
     const t = c.currentTime;
@@ -28,7 +31,7 @@ export function playType(): void {
     osc.type = "sine";
     osc.frequency.setValueAtTime(230 + Math.random() * 40, t); // 単調にならないよう揺らす
     osc.frequency.exponentialRampToValueAtTime(70, t + 0.035);
-    gain.gain.setValueAtTime(0.55, t);
+    gain.gain.setValueAtTime(0.55 * typeVolume, t);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
     osc.connect(gain).connect(c.destination);
     osc.start(t);
@@ -40,7 +43,7 @@ export function playType(): void {
     const lp = c.createBiquadFilter();
     lp.type = "lowpass";
     lp.frequency.value = 3500;
-    ngain.gain.setValueAtTime(0.2, t);
+    ngain.gain.setValueAtTime(0.2 * typeVolume, t);
     ngain.gain.exponentialRampToValueAtTime(0.0001, t + 0.015);
     nsrc.connect(lp).connect(ngain).connect(c.destination);
     nsrc.start(t);
@@ -52,6 +55,8 @@ export function playType(): void {
 
 /** ミス音: 低い短いブザー */
 export function playMiss(): void {
+  const { typeSound, typeVolume } = getSettings();
+  if (!typeSound) return;
   try {
     const c = audio();
     const t = c.currentTime;
@@ -59,7 +64,7 @@ export function playMiss(): void {
     const gain = c.createGain();
     osc.type = "sawtooth";
     osc.frequency.value = 140;
-    gain.gain.setValueAtTime(0.16, t);
+    gain.gain.setValueAtTime(0.16 * typeVolume, t);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
     osc.connect(gain).connect(c.destination);
     osc.start(t);

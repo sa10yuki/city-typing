@@ -1,6 +1,7 @@
 // 市町村名の読み上げ
 // VOICEVOXで事前生成した音声（public/voice/<styleId>/<code>.opus）を優先再生し、
 // 無い場合や「ブラウザ標準」選択時はWeb Speech APIにフォールバックする。
+import { getSettings } from "./settings";
 
 export interface VoiceOption {
   id: string; // "vv:2" or "browser"
@@ -29,23 +30,6 @@ export const VOICE_OPTIONS: VoiceOption[] = [
 const BASE = import.meta.env.BASE_URL; // 通常 "/"
 const VOICE_DIR = `${BASE}voice`;
 const SAMPLE_CODE = "01100"; // 試聴用（札幌市）
-
-const KEY = "city-typing-voice";
-let selected: string =
-  (typeof localStorage !== "undefined" && localStorage.getItem(KEY)) || "vv:2";
-
-export function getSelectedVoice(): string {
-  return selected;
-}
-
-export function setSelectedVoice(id: string): void {
-  selected = id;
-  try {
-    localStorage.setItem(KEY, id);
-  } catch {
-    // noop
-  }
-}
 
 let currentAudio: HTMLAudioElement | null = null;
 
@@ -88,9 +72,11 @@ function speakTTS(kana: string): void {
 
 /** 市区町村の読みを再生する（code=5桁コード, kana=フォールバック用の読み） */
 export function speakMuni(code: string, kana: string): void {
+  const { voiceEnabled, voiceId } = getSettings();
+  if (!voiceEnabled) return;
   stopSpeech();
-  if (selected.startsWith("vv:")) {
-    playClip(selected.slice(3), code, () => speakTTS(kana));
+  if (voiceId.startsWith("vv:")) {
+    playClip(voiceId.slice(3), code, () => speakTTS(kana));
   } else {
     speakTTS(kana);
   }

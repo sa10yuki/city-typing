@@ -2,7 +2,6 @@ import { useCallback, useMemo } from "react";
 import { munisByPref, muniByCode, prefs, TOTAL_MUNIS } from "../lib/data";
 import { formatMs, type SaveData } from "../lib/storage";
 import MuniMap from "./MuniMap";
-import VoicePicker from "./VoicePicker";
 
 interface Props {
   save: SaveData;
@@ -50,7 +49,6 @@ export default function Home({ save, onSelectPref }: Props) {
             <div className="progress-fill" style={{ width: `${pct}%` }} />
           </div>
         </div>
-        <VoicePicker />
       </header>
 
       <div className="home-body">

@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import Home from "./components/Home";
 import PlayScreen, { type MuniResult, type RunResult } from "./components/PlayScreen";
 import ResultScreen from "./components/ResultScreen";
+import SettingsMenu from "./components/SettingsMenu";
 import { loadSave, persistSave, type SaveData } from "./lib/storage";
 
 type View =
@@ -65,6 +66,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <SettingsMenu />
       {view.t === "home" && <Home save={save} onSelectPref={startPlay} />}
       {view.t === "play" && (
         <PlayScreen

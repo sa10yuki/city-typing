@@ -3,6 +3,7 @@ import { munisByPref, prefName, shuffle, type Muni } from "../lib/data";
 import { TypingChallenge } from "../lib/romaji";
 import { playMiss, playType } from "../lib/sound";
 import { speakMuni, stopSpeech } from "../lib/speech";
+import { useSettings } from "../lib/settings";
 import { formatMsCoarse } from "../lib/storage";
 import MuniMap from "./MuniMap";
 
@@ -34,6 +35,7 @@ const COLOR_CURRENT = "#f59e0b";
 const COLOR_IDLE = "#e2e8f0";
 
 export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish, onQuit }: Props) {
+  const { layout } = useSettings();
   const queue = useMemo<Muni[]>(() => shuffle(munisByPref.get(prefId) ?? []), [prefId]);
   // ゲーム進行はすべてrefで持つ（高速連打時にレンダー待ちの古いstateを掴まないため）
   const idxRef = useRef(0);
@@ -167,18 +169,20 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
         </div>
       </header>
 
-      <div className="play-body">
-        <div className="play-map">
-          <MuniMap
-            prefId={prefId}
-            width={470}
-            height={470}
-            getFill={getFill}
-            highlightCode={current?.c}
-            terrain
-          />
-          <p className="map-attrib">地形: 国土地理院（色別標高図・陰影起伏図）／湖沼: 国土数値情報</p>
-        </div>
+      <div className={`play-body layout-${layout}`}>
+        {layout !== "focus" && (
+          <div className="play-map">
+            <MuniMap
+              prefId={prefId}
+              width={470}
+              height={470}
+              getFill={getFill}
+              highlightCode={current?.c}
+              terrain
+            />
+            <p className="map-attrib">地形: 国土地理院（色別標高図・陰影起伏図）／湖沼: 国土数値情報</p>
+          </div>
+        )}
 
         <div className={`question-card${missFlash ? " miss-flash" : ""}`}>
           {!started && <p className="hint">キーを打つとスタート！</p>}
