@@ -106,6 +106,19 @@ export default function Home({ save, onSelectPref }: Props) {
           </ul>
         </div>
       )}
+
+      <footer className="credits">
+        <p>
+          読み上げ音声:{" "}
+          <a href="https://voicevox.hiroshiba.jp/" target="_blank" rel="noopener noreferrer">
+            VOICEVOX
+          </a>{" "}
+          （VOICEVOX:四国めたん／VOICEVOX:ずんだもん／VOICEVOX:春日部つむぎ／VOICEVOX:冥鳴ひまり／VOICEVOX:No.7）
+        </p>
+        <p>
+          地形: 国土地理院（色別標高図・陰影起伏図）／湖沼・行政区域: 国土数値情報（国土交通省）
+        </p>
+      </footer>
     </div>
   );
 }

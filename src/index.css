@@ -148,6 +148,29 @@ button {
   color: var(--text-sub);
 }
 
+.credits {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: #94a3b8;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.credits p {
+  margin: 2px 0;
+}
+
+.credits a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.credits a:hover {
+  text-decoration: underline;
+}
+
 .home-body {
   display: flex;
   gap: 28px;

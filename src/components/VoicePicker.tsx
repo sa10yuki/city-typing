@@ -1,65 +1,29 @@
-import { useEffect, useState } from "react";
-import {
-  getActiveVoiceName,
-  getJaVoiceNames,
-  onVoicesChanged,
-  setVoice,
-  speakName,
-} from "../lib/speech";
-
-// ブラウザのボイス名から分かりやすい表示名に整える
-function label(name: string): string {
-  // "Microsoft Ayumi - Japanese (Japan)" → "Ayumi"
-  const m = name.match(/Microsoft\s+([^\s-]+)/);
-  if (m) return m[1];
-  // "Google 日本語" などはそのまま
-  return name.replace(/\s*\(.*\)$/, "");
-}
-
-const SAMPLE = "さっぽろし"; // 試聴用サンプル読み
+import { useState } from "react";
+import { getSelectedVoice, previewVoice, setSelectedVoice, VOICE_OPTIONS } from "../lib/speech";
 
 export default function VoicePicker() {
-  const [names, setNames] = useState<string[]>(getJaVoiceNames());
-  const [active, setActive] = useState<string>(getActiveVoiceName());
-
-  useEffect(() => {
-    // ボイスは非同期で読み込まれることがあるため変更を購読
-    const refresh = () => {
-      setNames(getJaVoiceNames());
-      setActive(getActiveVoiceName());
-    };
-    refresh();
-    return onVoicesChanged(refresh);
-  }, []);
-
-  if (names.length === 0) {
-    return (
-      <div className="voice-picker">
-        <span className="voice-label">🔊 読み上げの声</span>
-        <span className="voice-none">この端末に日本語の音声が見つかりませんでした</span>
-      </div>
-    );
-  }
+  const [selected, setSelected] = useState<string>(getSelectedVoice());
 
   return (
     <div className="voice-picker">
-      <span className="voice-label">🔊 読み上げの声</span>
+      <span className="voice-label">🎙️ 読み上げの声</span>
       <select
         className="voice-select"
-        value={active}
+        value={selected}
         onChange={(e) => {
-          setVoice(e.target.value);
-          setActive(e.target.value);
-          speakName(SAMPLE); // 選んだ声で即試聴
+          const id = e.target.value;
+          setSelectedVoice(id);
+          setSelected(id);
+          previewVoice(id); // 選んだ声で即試聴
         }}
       >
-        {names.map((n) => (
-          <option key={n} value={n}>
-            {label(n)}
+        {VOICE_OPTIONS.map((v) => (
+          <option key={v.id} value={v.id}>
+            {v.label}
           </option>
         ))}
       </select>
-      <button className="btn ghost voice-try" onClick={() => speakName(SAMPLE)}>
+      <button className="btn ghost voice-try" onClick={() => previewVoice(selected)}>
         ▶ 試聴
       </button>
     </div>

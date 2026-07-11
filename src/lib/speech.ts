@@ -1,77 +1,114 @@
-// Web Speech APIによる市町村名の読み上げ
-// 漢字は地名の読み間違いが多いので、ひらがなの読みを渡して発音させる
+// 市町村名の読み上げ
+// VOICEVOXで事前生成した音声（public/voice/<styleId>/<code>.opus）を優先再生し、
+// 無い場合や「ブラウザ標準」選択時はWeb Speech APIにフォールバックする。
 
-const VOICE_KEY = "city-typing-voice";
-
-let selectedName: string =
-  typeof localStorage !== "undefined" ? (localStorage.getItem(VOICE_KEY) ?? "") : "";
-
-function jaVoices(): SpeechSynthesisVoice[] {
-  if (!("speechSynthesis" in window)) return [];
-  return speechSynthesis.getVoices().filter((v) => v.lang.startsWith("ja"));
+export interface VoiceOption {
+  id: string; // "vv:2" or "browser"
+  label: string;
+  credit?: string; // 例: VOICEVOX:四国めたん
 }
 
-/** 選択可能な日本語ボイス名の一覧（読み込み前は空のことがある） */
-export function getJaVoiceNames(): string[] {
-  return jaVoices().map((v) => v.name);
+// アプリに組み込むVOICEVOXキャラ（生成スクリプトのVOICESと一致させる）
+export const VOICEVOX_VOICES = [
+  { styleId: 2, char: "四国めたん" },
+  { styleId: 3, char: "ずんだもん" },
+  { styleId: 8, char: "春日部つむぎ" },
+  { styleId: 14, char: "冥鳴ひまり" },
+  { styleId: 29, char: "No.7" },
+] as const;
+
+export const VOICE_OPTIONS: VoiceOption[] = [
+  ...VOICEVOX_VOICES.map((v) => ({
+    id: `vv:${v.styleId}`,
+    label: v.char,
+    credit: `VOICEVOX:${v.char}`,
+  })),
+  { id: "browser", label: "ブラウザ標準（オフライン）" },
+];
+
+const BASE = import.meta.env.BASE_URL; // 通常 "/"
+const VOICE_DIR = `${BASE}voice`;
+const SAMPLE_CODE = "01100"; // 試聴用（札幌市）
+
+const KEY = "city-typing-voice";
+let selected: string =
+  (typeof localStorage !== "undefined" && localStorage.getItem(KEY)) || "vv:2";
+
+export function getSelectedVoice(): string {
+  return selected;
 }
 
-/** ボイス一覧が変わったら通知を受ける（非同期読み込み対応） */
-export function onVoicesChanged(cb: () => void): () => void {
-  if (!("speechSynthesis" in window)) return () => {};
-  speechSynthesis.addEventListener("voiceschanged", cb);
-  return () => speechSynthesis.removeEventListener("voiceschanged", cb);
-}
-
-export function setVoice(name: string): void {
-  selectedName = name;
+export function setSelectedVoice(id: string): void {
+  selected = id;
   try {
-    localStorage.setItem(VOICE_KEY, name);
+    localStorage.setItem(KEY, id);
   } catch {
     // noop
   }
 }
 
-/** 現在使われるボイス名（未選択時はおすすめ順の自動選択） */
-export function getActiveVoiceName(): string {
-  return resolveVoice()?.name ?? "";
+let currentAudio: HTMLAudioElement | null = null;
+
+function stopAudio(): void {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
 }
 
-function resolveVoice(): SpeechSynthesisVoice | null {
-  const vs = jaVoices();
-  if (selectedName) {
-    const v = vs.find((v) => v.name === selectedName);
-    if (v) return v;
-  }
-  // かわいい寄りの女性ボイスを優先
-  const prefer = ["nanami", "ayumi", "sayaka", "google 日本語", "haruka", "kyoko"];
-  for (const p of prefer) {
-    const v = vs.find((v) => v.name.toLowerCase().includes(p));
-    if (v) return v;
-  }
-  return vs[0] ?? null;
+/** VOICEVOX音声を再生。失敗時は fallback() を一度だけ呼ぶ */
+function playClip(styleId: string, code: string, fallback: () => void): void {
+  const audio = new Audio(`${VOICE_DIR}/${styleId}/${code}.opus`);
+  currentAudio = audio;
+  let fellBack = false;
+  const goFallback = () => {
+    if (fellBack) return;
+    fellBack = true;
+    fallback();
+  };
+  audio.addEventListener("error", goFallback);
+  audio.play().catch(goFallback);
 }
 
-/** 読み（ひらがな）をかわいめの声で読み上げる。直前の読み上げは中断する */
-export function speakName(kana: string): void {
+function speakTTS(kana: string): void {
   try {
     if (!("speechSynthesis" in window)) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(kana);
-    const voice = resolveVoice();
-    if (voice) u.voice = voice;
+    const ja = speechSynthesis.getVoices().find((v) => v.lang.startsWith("ja"));
+    if (ja) u.voice = ja;
     u.lang = "ja-JP";
-    u.pitch = 1.3; // 高めでかわいく
+    u.pitch = 1.3;
     u.rate = 1.1;
-    u.volume = 0.9;
     speechSynthesis.speak(u);
   } catch {
-    // 読み上げできない環境では黙って続行
+    // noop
   }
 }
 
-/** 読み上げを止める（画面離脱時など） */
+/** 市区町村の読みを再生する（code=5桁コード, kana=フォールバック用の読み） */
+export function speakMuni(code: string, kana: string): void {
+  stopSpeech();
+  if (selected.startsWith("vv:")) {
+    playClip(selected.slice(3), code, () => speakTTS(kana));
+  } else {
+    speakTTS(kana);
+  }
+}
+
+/** 指定ボイスの試聴（札幌市を読む）。ブラウザ標準は固定文言 */
+export function previewVoice(voiceId: string): void {
+  stopSpeech();
+  if (voiceId.startsWith("vv:")) {
+    playClip(voiceId.slice(3), SAMPLE_CODE, () => speakTTS("さっぽろし"));
+  } else {
+    speakTTS("さっぽろし");
+  }
+}
+
+/** 読み上げ・再生を止める */
 export function stopSpeech(): void {
+  stopAudio();
   try {
     if ("speechSynthesis" in window) speechSynthesis.cancel();
   } catch {
