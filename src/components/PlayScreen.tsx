@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { munisByPref, prefName, shuffle, type Muni } from "../lib/data";
 import { TypingChallenge } from "../lib/romaji";
 import { playMiss, playType } from "../lib/sound";
+import { speakName, stopSpeech } from "../lib/speech";
 import { formatMs } from "../lib/storage";
 import MuniMap from "./MuniMap";
 
@@ -129,6 +130,12 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
 
   const idx = idxRef.current;
   const current = queue[idx];
+
+  // お題が変わったら正式な読み（市・町・村・区まで）を読み上げる
+  useEffect(() => {
+    if (current) speakName(current.k);
+  }, [current]);
+  useEffect(() => stopSpeech, []);
   const challenge = challengeRef.current;
   const kanaDone = challenge?.kanaDone ?? 0;
   const curLen = challenge?.currentKana.length ?? 0;

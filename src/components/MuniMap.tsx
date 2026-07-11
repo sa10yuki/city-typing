@@ -165,7 +165,7 @@ export default function MuniMap({
                 y={(y + ty) * tileScale}
                 width={tileScale}
                 height={tileScale}
-                opacity={0.45}
+                opacity={0.34}
                 style={{ mixBlendMode: "multiply" }}
               />
             ))}
@@ -177,7 +177,7 @@ export default function MuniMap({
                 y={(y + ty) * tileScale}
                 width={tileScale}
                 height={tileScale}
-                opacity={0.35}
+                opacity={0.26}
                 style={{ mixBlendMode: "multiply" }}
               />
             ))}
