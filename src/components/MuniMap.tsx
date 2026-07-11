@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { feature } from "topojson-client";
 import type { Topology, GeometryCollection } from "topojson-specification";
 import { geoArea, geoMercator, geoPath } from "d3-geo";
+import { tile as d3tile } from "d3-tile";
 import type { FeatureCollection, Feature, Geometry, Position } from "geojson";
 import topoRaw from "../data/japan-topo.json";
 
@@ -42,10 +43,29 @@ export interface MuniMapProps {
   onClickMuni?: (code: string) => void;
   /** ポリゴンにtitle（市区町村名）を付けるための解決関数 */
   getTitle?: (code: string) => string | undefined;
+  /** 強調表示する市区町村コード（出題中のお題など） */
+  highlightCode?: string;
+  /** 地形（陰影起伏）をうっすら重ねるか */
+  terrain?: boolean;
 }
 
-export default function MuniMap({ prefId, width, height, getFill, onClickMuni, getTitle }: MuniMapProps) {
-  const { paths } = useMemo(() => {
+interface PathEntry {
+  d: string;
+  code: string | null;
+  f: Feature<Geometry, MuniProps>;
+}
+
+export default function MuniMap({
+  prefId,
+  width,
+  height,
+  getFill,
+  onClickMuni,
+  getTitle,
+  highlightCode,
+  terrain = true,
+}: MuniMapProps) {
+  const { paths, pathGen, tiles, tileScale, tileTranslate } = useMemo(() => {
     const pp = prefId ? String(prefId).padStart(2, "0") : null;
     const features = pp
       ? fc.features.filter((f) => f.properties.c?.startsWith(pp))
@@ -60,14 +80,43 @@ export default function MuniMap({ prefId, width, height, getFill, onClickMuni, g
       sub
     );
     const pathGen = geoPath(projection);
-    const paths = features
-      .map((f: Feature<Geometry, MuniProps>) => ({
-        d: pathGen(f) ?? "",
-        code: f.properties.c,
-      }))
+    const paths: PathEntry[] = features
+      .map((f) => ({ d: pathGen(f) ?? "", code: f.properties.c, f }))
       .filter((p) => p.d !== "");
-    return { paths };
+
+    // 陰影起伏タイルの配置（Webメルカトルのスケール・平行移動をd3-tileで算出）
+    const t = d3tile()
+      .size([width, height])
+      .scale(projection.scale() * 2 * Math.PI)
+      .translate(projection([0, 0]) as [number, number])();
+    return {
+      paths,
+      pathGen,
+      tiles: t as unknown as [number, number, number][],
+      tileScale: (t as unknown as { scale: number }).scale,
+      tileTranslate: (t as unknown as { translate: [number, number] }).translate,
+    };
   }, [prefId, width, height]);
+
+  // 出題中の市区町村: 縁取り＋最大ポリゴン中心にパルスリング
+  const highlight = useMemo(() => {
+    if (!highlightCode) return null;
+    const items = paths.filter((p) => p.code === highlightCode);
+    if (items.length === 0) return null;
+    let biggest = items[0];
+    let maxArea = -1;
+    for (const it of items) {
+      const a = pathGen.area(it.f);
+      if (a > maxArea) {
+        maxArea = a;
+        biggest = it;
+      }
+    }
+    const [cx, cy] = pathGen.centroid(biggest.f);
+    return { items, cx, cy };
+  }, [paths, pathGen, highlightCode]);
+
+  const [tx, ty] = tileTranslate;
 
   return (
     <svg
@@ -89,6 +138,34 @@ export default function MuniMap({ prefId, width, height, getFill, onClickMuni, g
           {p.code && getTitle?.(p.code) ? <title>{getTitle(p.code)}</title> : null}
         </path>
       ))}
+
+      {terrain &&
+        tiles.map(([x, y, z]) => (
+          <image
+            key={`${z}-${x}-${y}`}
+            href={`https://cyberjapandata.gsi.go.jp/xyz/hillshademap/${z}/${x}/${y}.png`}
+            x={(x + tx) * tileScale}
+            y={(y + ty) * tileScale}
+            width={tileScale}
+            height={tileScale}
+            opacity={0.28}
+            pointerEvents="none"
+            style={{ mixBlendMode: "multiply" }}
+          />
+        ))}
+
+      {highlight && (
+        <g pointerEvents="none">
+          {highlight.items.map((p, i) => (
+            <path key={i} d={p.d} fill="none" stroke="#d97706" strokeWidth={1.8} />
+          ))}
+          <circle cx={highlight.cx} cy={highlight.cy} r={3} fill="#d97706" />
+          <circle cx={highlight.cx} cy={highlight.cy} fill="none" stroke="#d97706" strokeWidth={2}>
+            <animate attributeName="r" values="4;18" dur="1.1s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.9;0" dur="1.1s" repeatCount="indefinite" />
+          </circle>
+        </g>
+      )}
     </svg>
   );
 }

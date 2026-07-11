@@ -162,14 +162,27 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
 
       <div className="play-body">
         <div className="play-map">
-          <MuniMap prefId={prefId} width={380} height={380} getFill={getFill} />
+          <MuniMap
+            prefId={prefId}
+            width={380}
+            height={380}
+            getFill={getFill}
+            highlightCode={current?.c}
+          />
+          <p className="map-attrib">地形: 国土地理院 陰影起伏図</p>
         </div>
 
         <div className={`question-card${missFlash ? " miss-flash" : ""}`}>
           {!started && <p className="hint">キーを打つとスタート！</p>}
           {current && (
             <>
-              <div className="q-name">{current.b}</div>
+              <div className="q-name">
+                {current.b}
+                <ruby className="q-suffix">
+                  {current.n.slice(current.b.length)}
+                  <rt>{current.k.slice(current.bk.length)}</rt>
+                </ruby>
+              </div>
               <div className="q-kana">
                 <span className="kana-done">{current.bk.slice(0, kanaDone)}</span>
                 <span className="kana-current">{current.bk.slice(kanaDone, kanaDone + curLen)}</span>

@@ -61,6 +61,7 @@ export default function Home({ save, onSelectPref }: Props) {
             onClickMuni={(code) => onSelectPref(Number(code.slice(0, 2)))}
           />
           <p className="map-hint">地図をクリックしても都道府県を選べるよ</p>
+          <p className="map-attrib">地形: 国土地理院 陰影起伏図</p>
         </div>
 
         <div className="pref-list">
