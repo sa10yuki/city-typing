@@ -51,6 +51,20 @@ export default function Home({ save, onSelectPref }: Props) {
         </div>
       </header>
 
+      <div className="rules">
+        <h2>遊び方</h2>
+        <ul>
+          <li>都道府県を選ぶと、県内の全市区町村がランダムに出題される<b>タイムアタック</b>。</li>
+          <li>表示された市町村名を<b>ローマ字で入力</b>。「し」は si / shi など複数の打ち方でOK。</li>
+          <li>末尾の「市・町・村・区」は<b>打たなくてOK</b>（名前の右に読みだけ表示）。</li>
+          <li>
+            <b>ミスタイプするとその市町村は制覇にならない</b>よ。すでに制覇済みでも、ミスすると制覇が外れちゃう。
+            ノーミスで打ち切ってこそ制覇！
+          </li>
+          <li>県内を全部打ち切ると<b>ベストタイム</b>を記録。全国1,741市区町村の完全制覇を目指そう🗾</li>
+        </ul>
+      </div>
+
       <div className="home-body">
         <div className="home-map">
           <MuniMap

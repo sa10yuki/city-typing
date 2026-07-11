@@ -143,6 +143,8 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
   const challenge = challengeRef.current;
   const kanaDone = challenge?.kanaDone ?? 0;
   const curLen = challenge?.currentKana.length ?? 0;
+  const romajiDone = challenge?.romajiDone ?? "";
+  const romajiRest = challenge?.romajiRest ?? "";
 
   const getFill = useCallback(
     (code: string | null) => {
@@ -203,8 +205,9 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
                 <span className="kana-rest">{current.bk.slice(kanaDone + curLen)}</span>
               </div>
               <div className="q-romaji">
-                <span className="romaji-done">{challenge?.romajiDone}</span>
-                <span className="romaji-rest">{challenge?.romajiRest}</span>
+                <span className="romaji-done">{romajiDone}</span>
+                <span className="romaji-next">{romajiRest.slice(0, 1)}</span>
+                <span className="romaji-rest">{romajiRest.slice(1)}</span>
               </div>
             </>
           )}
