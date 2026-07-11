@@ -19,10 +19,16 @@ export default function ResultScreen({ result, isBest, best, onRetry, onHome }: 
       : "100.0";
 
   const missed = [...result.perMuni].filter((m) => m.miss > 0).sort((a, b) => b.miss - a.miss);
+  const clean = result.perMuni.filter((m) => m.miss === 0).length;
+  const total = result.perMuni.length;
+  const perfect = clean === total;
 
   return (
     <div className="result">
-      <h2>{prefName(result.prefId)} 制覇！🎉</h2>
+      <h2>
+        {prefName(result.prefId)}
+        {perfect ? " 完全制覇！🎉" : " クリア！🏁"}
+      </h2>
       <div className="result-time">
         <span className="big-time">{formatMs(result.totalMs)}</span>
         {isBest ? (
@@ -45,8 +51,10 @@ export default function ResultScreen({ result, isBest, best, onRetry, onHome }: 
           <span className="stat-label">ミス</span>
         </div>
         <div className="stat">
-          <span className="stat-value">{result.perMuni.length}</span>
-          <span className="stat-label">市区町村</span>
+          <span className="stat-value">
+            {clean}/{total}
+          </span>
+          <span className="stat-label">制覇（ノーミス）</span>
         </div>
       </div>
 

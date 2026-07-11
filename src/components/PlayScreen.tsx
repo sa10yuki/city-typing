@@ -100,7 +100,9 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
           miss: qMissRef.current,
         };
         perMuniRef.current.push(r);
-        runClearedRef.current.add(current.c);
+        // ノーミスのときだけ地図上で制覇（緑）に。ミスありは制覇扱いにしない
+        if (r.miss === 0) runClearedRef.current.add(current.c);
+        else runClearedRef.current.delete(current.c);
         onMuniCleared(r);
         idxRef.current += 1;
         qMissRef.current = 0;
@@ -156,8 +158,8 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
   return (
     <div className="play">
       <header className="play-header">
-        <button className="btn ghost" onClick={onQuit}>
-          ← やめる (Esc)
+        <button className="btn-back" onClick={onQuit}>
+          <span className="back-arrow">←</span> 戻る<span className="back-esc">Esc</span>
         </button>
         <h2>{prefName(prefId)} タイムアタック</h2>
         <div className="play-meta">

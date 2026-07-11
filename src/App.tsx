@@ -27,14 +27,22 @@ export default function App() {
     (r: MuniResult) => {
       update((d) => {
         const stat = d.muniStats[r.code] ?? { miss: 0, clears: 0, totalMs: 0 };
+        // ノーミスで打ち切ったときだけ制覇。ミスがあれば制覇にならず、
+        // 既に制覇済みでもその回で制覇が外れる。
+        const cleared = { ...d.cleared };
+        if (r.miss === 0) {
+          cleared[r.code] = 1;
+        } else {
+          delete cleared[r.code];
+        }
         return {
           ...d,
-          cleared: { ...d.cleared, [r.code]: 1 as const },
+          cleared,
           muniStats: {
             ...d.muniStats,
             [r.code]: {
               miss: stat.miss + r.miss,
-              clears: stat.clears + 1,
+              clears: stat.clears + (r.miss === 0 ? 1 : 0),
               totalMs: stat.totalMs + r.ms,
             },
           },
