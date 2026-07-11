@@ -122,20 +122,41 @@ button {
 }
 
 .settings-gear {
-  width: 42px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   height: 42px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: #fff;
-  font-size: 20px;
+  padding: 0 16px 0 13px;
+  border-radius: 21px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
-  transition: transform 0.2s;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .settings-gear:hover {
-  transform: rotate(30deg);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.5);
+}
+
+.settings-gear .gear-icon {
+  font-size: 19px;
+  animation: gear-spin 6s linear infinite;
+}
+
+.settings-gear:hover .gear-icon {
+  animation-duration: 1.5s;
+}
+
+@keyframes gear-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .settings-panel {

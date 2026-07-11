@@ -32,7 +32,8 @@ export default function SettingsMenu() {
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
-        ⚙
+        <span className="gear-icon">⚙</span>
+        <span className="gear-text">設定</span>
       </button>
 
       {open && (
@@ -97,6 +98,18 @@ export default function SettingsMenu() {
                 </button>
               </div>
             </div>
+            <label className="row sub">
+              <span>音量</span>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={s.voiceVolume}
+                disabled={!s.voiceEnabled}
+                onChange={(e) => updateSettings({ voiceVolume: Number(e.target.value) })}
+              />
+            </label>
           </section>
 
           <section>

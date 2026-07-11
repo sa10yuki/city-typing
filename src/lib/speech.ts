@@ -43,6 +43,7 @@ function stopAudio(): void {
 /** VOICEVOX音声を再生。失敗時は fallback() を一度だけ呼ぶ */
 function playClip(styleId: string, code: string, fallback: () => void): void {
   const audio = new Audio(`${VOICE_DIR}/${styleId}/${code}.opus`);
+  audio.volume = getSettings().voiceVolume;
   currentAudio = audio;
   let fellBack = false;
   const goFallback = () => {
@@ -64,6 +65,7 @@ function speakTTS(kana: string): void {
     u.lang = "ja-JP";
     u.pitch = 1.3;
     u.rate = 1.1;
+    u.volume = getSettings().voiceVolume;
     speechSynthesis.speak(u);
   } catch {
     // noop

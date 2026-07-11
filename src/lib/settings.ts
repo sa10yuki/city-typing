@@ -10,6 +10,8 @@ export interface Settings {
   typeVolume: number;
   /** 市町村名を読み上げるか */
   voiceEnabled: boolean;
+  /** 読み上げの音量 0..1 */
+  voiceVolume: number;
   /** 読み上げボイスID（"vv:2" ... / "browser"） */
   voiceId: string;
   /** タイピング画面の地図・お題の配置 */
@@ -23,6 +25,7 @@ const DEFAULTS: Settings = {
   typeSound: true,
   typeVolume: 0.6,
   voiceEnabled: true,
+  voiceVolume: 1.0,
   voiceId: "vv:2",
   layout: "map-left",
 };
