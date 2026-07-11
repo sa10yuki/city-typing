@@ -23,7 +23,7 @@ for (const poly of merged.coordinates) {
 }
 
 const SIZE = 512;
-const M = 40;
+const M = 26; // 余白を詰めて土地を大きく見せる
 const projection = geoMercator().fitExtent(
   [
     [M, M],
@@ -33,9 +33,9 @@ const projection = geoMercator().fitExtent(
 );
 const path = geoPath(projection);
 
-// ファビコンは小さく表示されるので、見えない離島を捨て、点も間引いて軽量化する
-const MIN_AREA = 6; // 投影後のピクセル面積の下限
-const TOL = 2.2; // 間引く点間距離（px）
+// ファビコンは小さく表示されるので、面積上位の主要4島だけ残す（沖縄など離島は省く）
+const KEEP_ISLANDS = 4;
+const TOL = 2.5; // 間引く点間距離（px）
 
 // 投影後にTOL未満の点を捨てるリング簡略化
 function simplifyRing(ring) {
@@ -58,18 +58,24 @@ function ringToPath(ring) {
   );
 }
 
+// 面積の大きい順に上位KEEP_ISLANDS島を選ぶ
+const mainIslands = merged.coordinates
+  .map((poly) => ({ poly, area: path.area({ type: "Polygon", coordinates: poly }) }))
+  .sort((a, b) => b.area - a.area)
+  .slice(0, KEEP_ISLANDS);
+
 let d = "";
 let kept = 0;
-for (const poly of merged.coordinates) {
-  if (path.area({ type: "Polygon", coordinates: poly }) < MIN_AREA) continue;
+for (const { poly } of mainIslands) {
   const outer = simplifyRing(poly[0]);
   if (!outer) continue;
   d += ringToPath(outer);
   kept++;
 }
 
+// 白フィル＋太い白ストロークで土地をぷっくりデフォルメ（小さくても潰れにくい）
 const accent = "#6366f1";
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}"><rect width="${SIZE}" height="${SIZE}" rx="96" fill="${accent}"/><path d="${d}" fill="#ffffff" stroke="#ffffff" stroke-width="6" stroke-linejoin="round"/></svg>
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}"><rect width="${SIZE}" height="${SIZE}" rx="96" fill="${accent}"/><path d="${d}" fill="#ffffff" stroke="#ffffff" stroke-width="30" stroke-linejoin="round" stroke-linecap="round"/></svg>
 `;
 
 writeFileSync(join(root, "public/favicon.svg"), svg);
