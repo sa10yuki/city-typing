@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
 import { feature } from "topojson-client";
 import type { Topology, GeometryCollection } from "topojson-specification";
 import { geoArea, geoMercator, geoPath } from "d3-geo";
@@ -63,8 +63,9 @@ export default function MuniMap({
   onClickMuni,
   getTitle,
   highlightCode,
-  terrain = true,
+  terrain = false,
 }: MuniMapProps) {
+  const clipId = useId();
   const { paths, pathGen, tiles, tileScale, tileTranslate } = useMemo(() => {
     const pp = prefId ? String(prefId).padStart(2, "0") : null;
     const features = pp
@@ -139,20 +140,30 @@ export default function MuniMap({
         </path>
       ))}
 
-      {terrain &&
-        tiles.map(([x, y, z]) => (
-          <image
-            key={`${z}-${x}-${y}`}
-            href={`https://cyberjapandata.gsi.go.jp/xyz/hillshademap/${z}/${x}/${y}.png`}
-            x={(x + tx) * tileScale}
-            y={(y + ty) * tileScale}
-            width={tileScale}
-            height={tileScale}
-            opacity={0.28}
-            pointerEvents="none"
-            style={{ mixBlendMode: "multiply" }}
-          />
-        ))}
+      {terrain && (
+        <>
+          <clipPath id={clipId}>
+            {paths.map((p, i) => (
+              <path key={i} d={p.d} />
+            ))}
+          </clipPath>
+          {/* 地形（陰影起伏）は行政区域の形でくり抜いて内側だけに表示する */}
+          <g clipPath={`url(#${clipId})`} pointerEvents="none">
+            {tiles.map(([x, y, z]) => (
+              <image
+                key={`${z}-${x}-${y}`}
+                href={`https://cyberjapandata.gsi.go.jp/xyz/hillshademap/${z}/${x}/${y}.png`}
+                x={(x + tx) * tileScale}
+                y={(y + ty) * tileScale}
+                width={tileScale}
+                height={tileScale}
+                opacity={0.4}
+                style={{ mixBlendMode: "multiply" }}
+              />
+            ))}
+          </g>
+        </>
+      )}
 
       {highlight && (
         <g pointerEvents="none">

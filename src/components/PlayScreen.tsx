@@ -168,6 +168,7 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
             height={380}
             getFill={getFill}
             highlightCode={current?.c}
+            terrain
           />
           <p className="map-attrib">地形: 国土地理院 陰影起伏図</p>
         </div>
