@@ -164,13 +164,13 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
         <div className="play-map">
           <MuniMap
             prefId={prefId}
-            width={380}
-            height={380}
+            width={470}
+            height={470}
             getFill={getFill}
             highlightCode={current?.c}
             terrain
           />
-          <p className="map-attrib">地形: 国土地理院 陰影起伏図</p>
+          <p className="map-attrib">地形: 国土地理院（色別標高図・陰影起伏図）／湖沼: 国土数値情報</p>
         </div>
 
         <div className={`question-card${missFlash ? " miss-flash" : ""}`}>

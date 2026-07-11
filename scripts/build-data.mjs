@@ -6,6 +6,8 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { read as shpRead } from "shapefile";
+import { geoArea } from "d3-geo";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (p) => JSON.parse(readFileSync(join(root, p), "utf8"));
@@ -102,7 +104,62 @@ if (unmatched.length) {
 topo.objects.munis = topo.objects[objName];
 if (objName !== "munis") delete topo.objects[objName];
 
+// ---- 湖沼（国土数値情報 W09 シェープファイル → 主要湖沼のGeoJSON） ----
+function roundCoords(coords) {
+  if (typeof coords[0] === "number") return coords.map((v) => Math.round(v * 1e4) / 1e4);
+  return coords.map(roundCoords);
+}
+
+const shp = await shpRead(
+  join(root, "rawdata/W09/W09-05-g_Lake.shp"),
+  join(root, "rawdata/W09/W09-05-g_Lake.dbf")
+);
+const KM2 = 6371 * 6371; // ステラジアン→km²
+const MIN_LAKE_KM2 = 2;
+const EPS_DEG = 0.002; // 約200m間隔に間引く（県地図の1px未満）
+
+function decimateRing(ring) {
+  const out = [ring[0]];
+  for (let i = 1; i < ring.length - 1; i++) {
+    const [px, py] = out[out.length - 1];
+    const [x, y] = ring[i];
+    if (Math.abs(x - px) > EPS_DEG || Math.abs(y - py) > EPS_DEG) out.push(ring[i]);
+  }
+  out.push(ring[ring.length - 1]);
+  return out.length >= 4 ? out : null;
+}
+
+function decimatePolygon(poly) {
+  const rings = poly.map(decimateRing).filter(Boolean);
+  return rings.length > 0 ? rings : null;
+}
+
+const lakes = { type: "FeatureCollection", features: [] };
+for (const f of shp.features) {
+  if (!f.geometry) continue;
+  // 巻き方向が逆だと球面の残り全体の面積になるため小さい方を採用
+  const a = geoArea(f.geometry);
+  const km2 = Math.min(a, 4 * Math.PI - a) * KM2;
+  if (km2 < MIN_LAKE_KM2) continue;
+  const g = f.geometry;
+  let coordinates;
+  if (g.type === "Polygon") {
+    coordinates = decimatePolygon(g.coordinates);
+  } else if (g.type === "MultiPolygon") {
+    coordinates = g.coordinates.map(decimatePolygon).filter(Boolean);
+    if (coordinates.length === 0) coordinates = null;
+  }
+  if (!coordinates) continue;
+  lakes.features.push({
+    type: "Feature",
+    properties: {},
+    geometry: { type: g.type, coordinates: roundCoords(coordinates) },
+  });
+}
+console.log(`lakes (>= ${MIN_LAKE_KM2}km2): ${lakes.features.length}`);
+
 mkdirSync(join(root, "src/data"), { recursive: true });
+writeFileSync(join(root, "src/data/water.json"), JSON.stringify({ lakes }));
 writeFileSync(
   join(root, "src/data/municipalities.json"),
   JSON.stringify({ prefs, munis })

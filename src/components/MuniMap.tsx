@@ -5,6 +5,7 @@ import { geoArea, geoMercator, geoPath } from "d3-geo";
 import { tile as d3tile } from "d3-tile";
 import type { FeatureCollection, Feature, Geometry, Position } from "geojson";
 import topoRaw from "../data/japan-topo.json";
+import waterRaw from "../data/water.json";
 
 interface MuniProps {
   c: string | null;
@@ -12,14 +13,15 @@ interface MuniProps {
 
 const topo = topoRaw as unknown as Topology<{ munis: GeometryCollection<MuniProps> }>;
 const fc = feature(topo, topo.objects.munis) as FeatureCollection<Geometry, MuniProps>;
+const lakes = (waterRaw as { lakes: FeatureCollection<Geometry> }).lakes;
 
 // d3-geoは球面幾何でポリゴンを解釈するため、リングの巻き方向が逆だと
 // 「地球全体からくり抜いた図形」扱いになり描画が壊れる。ここで巻き直す。
-{
+function rewind(features: Feature<Geometry, unknown>[]): void {
   const HEMISPHERE = Math.PI * 2;
   const ringArea = (ring: Position[]) =>
     geoArea({ type: "Polygon", coordinates: [ring] });
-  for (const f of fc.features) {
+  for (const f of features) {
     const g = f.geometry;
     const polys: Position[][][] =
       g.type === "Polygon" ? [g.coordinates] : g.type === "MultiPolygon" ? g.coordinates : [];
@@ -32,6 +34,8 @@ const fc = feature(topo, topo.objects.munis) as FeatureCollection<Geometry, Muni
     }
   }
 }
+rewind(fc.features);
+rewind(lakes.features);
 
 export interface MuniMapProps {
   /** 指定すると当該都道府県のみ描画（1-47） */
@@ -66,7 +70,7 @@ export default function MuniMap({
   terrain = false,
 }: MuniMapProps) {
   const clipId = useId();
-  const { paths, pathGen, tiles, tileScale, tileTranslate } = useMemo(() => {
+  const { paths, lakePaths, pathGen, tiles, tileScale, tileTranslate } = useMemo(() => {
     const pp = prefId ? String(prefId).padStart(2, "0") : null;
     const features = pp
       ? fc.features.filter((f) => f.properties.c?.startsWith(pp))
@@ -84,6 +88,9 @@ export default function MuniMap({
     const paths: PathEntry[] = features
       .map((f) => ({ d: pathGen(f) ?? "", code: f.properties.c, f }))
       .filter((p) => p.d !== "");
+    const lakePaths = lakes.features
+      .map((f) => pathGen(f) ?? "")
+      .filter((d) => d !== "");
 
     // 陰影起伏タイルの配置（Webメルカトルのスケール・平行移動をd3-tileで算出）
     const t = d3tile()
@@ -92,6 +99,7 @@ export default function MuniMap({
       .translate(projection([0, 0]) as [number, number])();
     return {
       paths,
+      lakePaths,
       pathGen,
       tiles: t as unknown as [number, number, number][],
       tileScale: (t as unknown as { scale: number }).scale,
@@ -147,19 +155,35 @@ export default function MuniMap({
               <path key={i} d={p.d} />
             ))}
           </clipPath>
-          {/* 地形（陰影起伏）は行政区域の形でくり抜いて内側だけに表示する */}
+          {/* 地形（色別標高＋陰影起伏）は行政区域の形でくり抜いて内側だけに表示する */}
           <g clipPath={`url(#${clipId})`} pointerEvents="none">
             {tiles.map(([x, y, z]) => (
               <image
-                key={`${z}-${x}-${y}`}
+                key={`relief-${z}-${x}-${y}`}
+                href={`https://cyberjapandata.gsi.go.jp/xyz/relief/${z}/${x}/${y}.png`}
+                x={(x + tx) * tileScale}
+                y={(y + ty) * tileScale}
+                width={tileScale}
+                height={tileScale}
+                opacity={0.45}
+                style={{ mixBlendMode: "multiply" }}
+              />
+            ))}
+            {tiles.map(([x, y, z]) => (
+              <image
+                key={`shade-${z}-${x}-${y}`}
                 href={`https://cyberjapandata.gsi.go.jp/xyz/hillshademap/${z}/${x}/${y}.png`}
                 x={(x + tx) * tileScale}
                 y={(y + ty) * tileScale}
                 width={tileScale}
                 height={tileScale}
-                opacity={0.4}
+                opacity={0.35}
                 style={{ mixBlendMode: "multiply" }}
               />
+            ))}
+            {/* 主要湖沼（国土数値情報 W09） */}
+            {lakePaths.map((d, i) => (
+              <path key={`lake-${i}`} d={d} fill="#8ec8f0" stroke="#5aa7dd" strokeWidth={0.5} />
             ))}
           </g>
         </>

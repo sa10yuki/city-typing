@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# 大きい生データ（再取得可能）
+rawdata/ne_lakes.json
+rawdata/ne_rivers.json
+rawdata/W09-05_GML.zip
+rawdata/W09/
