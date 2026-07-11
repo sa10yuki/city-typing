@@ -8,7 +8,7 @@ import { loadSave, persistSave, type SaveData } from "./lib/storage";
 type View =
   | { t: "home" }
   | { t: "play"; prefId: number; runKey: number }
-  | { t: "result"; result: RunResult; isBest: boolean; best: number };
+  | { t: "result"; result: RunResult; isBest: boolean; best?: number };
 
 export default function App() {
   const [save, setSave] = useState<SaveData>(loadSave);
@@ -55,14 +55,16 @@ export default function App() {
   const handleFinish = useCallback(
     (r: RunResult) => {
       const prevBest = save.prefBest[r.prefId];
-      const isBest = prevBest === undefined || r.totalMs < prevBest;
+      // ベストタイムは全市町村ノーミスで打ち切ったときのみ記録
+      const perfect = r.miss === 0;
+      const isBest = perfect && (prevBest === undefined || r.totalMs < prevBest);
       if (isBest) {
         update((d) => ({
           ...d,
           prefBest: { ...d.prefBest, [r.prefId]: r.totalMs },
         }));
       }
-      setView({ t: "result", result: r, isBest, best: isBest ? r.totalMs : prevBest! });
+      setView({ t: "result", result: r, isBest, best: isBest ? r.totalMs : prevBest });
     },
     [save.prefBest, update]
   );

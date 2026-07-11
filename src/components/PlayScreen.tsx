@@ -164,14 +164,14 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
           <span className="back-arrow">←</span> 戻る<span className="back-esc">Esc</span>
         </button>
         <h2>{prefName(prefId)} タイムアタック</h2>
-        <div className="play-meta">
-          <span className="counter">
-            {Math.min(idx + 1, queue.length)} / {queue.length}
-          </span>
-          <Timer started={started} startTime={startTimeRef.current} />
-          <span className="miss-count">ミス {missTotalRef.current}</span>
-        </div>
       </header>
+      <div className="play-meta">
+        <span className="counter">
+          {Math.min(idx + 1, queue.length)} / {queue.length}
+        </span>
+        <Timer started={started} startTime={startTimeRef.current} />
+        <span className="miss-count">ミス {missTotalRef.current}</span>
+      </div>
 
       <div className={`play-body layout-${layout}`}>
         {layout !== "focus" && (

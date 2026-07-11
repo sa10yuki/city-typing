@@ -5,7 +5,7 @@ import type { RunResult } from "./PlayScreen";
 interface Props {
   result: RunResult;
   isBest: boolean;
-  best: number;
+  best?: number;
   onRetry: () => void;
   onHome: () => void;
 }
@@ -33,9 +33,11 @@ export default function ResultScreen({ result, isBest, best, onRetry, onHome }: 
         <span className="big-time">{formatMs(result.totalMs)}</span>
         {isBest ? (
           <span className="badge best">ベスト更新！</span>
-        ) : (
+        ) : !perfect ? (
+          <span className="badge">ノーミス完走でタイム記録</span>
+        ) : best !== undefined ? (
           <span className="badge">ベスト {formatMs(best)}</span>
-        )}
+        ) : null}
       </div>
       <div className="result-stats">
         <div className="stat">

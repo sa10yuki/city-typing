@@ -41,6 +41,11 @@ export function persistSave(d: SaveData): void {
   localStorage.setItem(KEY, JSON.stringify(d));
 }
 
+/** これまでの記録（制覇・ベストタイム・統計）をすべて削除する。設定は残す */
+export function clearRecords(): void {
+  localStorage.removeItem(KEY);
+}
+
 export function formatMs(ms: number): string {
   const t = Math.floor(ms);
   const m = Math.floor(t / 60000);

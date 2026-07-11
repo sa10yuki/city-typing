@@ -274,6 +274,55 @@ button {
   color: var(--text-sub);
 }
 
+.reset-btn {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  background: #fff;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.reset-btn:hover {
+  background: #fef2f2;
+}
+
+.reset-btn.danger {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+.reset-btn.danger:hover {
+  background: #b91c1c;
+}
+
+.reset-confirm p {
+  font-size: 12px;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+
+.reset-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.reset-actions .reset-btn {
+  width: auto;
+  flex: 1;
+}
+
+.reset-actions .btn {
+  flex: 1;
+  padding: 9px 12px;
+  font-size: 13px;
+}
+
 .credits {
   margin-top: 40px;
   padding-top: 16px;
@@ -307,8 +356,8 @@ button {
 }
 
 .rules h2 {
-  font-size: 17px;
-  margin-bottom: 10px;
+  font-size: 15px;
+  margin-bottom: 8px;
   color: var(--accent);
 }
 
@@ -318,8 +367,8 @@ button {
 }
 
 .rules li {
-  font-size: 14px;
-  line-height: 1.75;
+  font-size: 12px;
+  line-height: 1.65;
   color: var(--text);
 }
 
@@ -407,7 +456,7 @@ button {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .btn-back {
@@ -450,16 +499,23 @@ button {
   color: #fff;
 }
 
+.play-header {
+  padding-right: 120px; /* 右上固定の設定ボタンを避ける */
+}
+
 .play-header h2 {
   font-size: 20px;
   flex: 1;
 }
 
+/* タイム類はヘッダーとは別行にして設定ボタンと重ならないようにする */
 .play-meta {
   display: flex;
   gap: 18px;
   align-items: baseline;
+  justify-content: center;
   font-variant-numeric: tabular-nums;
+  margin-bottom: 18px;
 }
 
 .counter {

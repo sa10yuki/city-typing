@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { updateSettings, useSettings, type Layout } from "../lib/settings";
 import { previewVoice, VOICE_OPTIONS } from "../lib/speech";
+import { clearRecords } from "../lib/storage";
 
 const LAYOUTS: { id: Layout; label: string; icon: string }[] = [
   { id: "map-left", label: "地図 左", icon: "◧" },
@@ -12,13 +13,17 @@ const LAYOUTS: { id: Layout; label: string; icon: string }[] = [
 export default function SettingsMenu() {
   const s = useSettings();
   const [open, setOpen] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   // 外側クリックで閉じる
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setConfirmReset(false);
+      }
     };
     window.addEventListener("mousedown", onDown);
     return () => window.removeEventListener("mousedown", onDown);
@@ -128,6 +133,32 @@ export default function SettingsMenu() {
                 </button>
               ))}
             </div>
+          </section>
+
+          <section>
+            {!confirmReset ? (
+              <button className="reset-btn" onClick={() => setConfirmReset(true)}>
+                これまでの記録を全て消す
+              </button>
+            ) : (
+              <div className="reset-confirm">
+                <p>制覇・ベストタイムが全て消えます。本当に消していい？</p>
+                <div className="reset-actions">
+                  <button
+                    className="reset-btn danger"
+                    onClick={() => {
+                      clearRecords();
+                      location.reload();
+                    }}
+                  >
+                    はい、消す
+                  </button>
+                  <button className="btn ghost" onClick={() => setConfirmReset(false)}>
+                    キャンセル
+                  </button>
+                </div>
+              </div>
+            )}
           </section>
         </div>
       )}

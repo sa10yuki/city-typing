@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { munisByPref, muniByCode, prefs, TOTAL_MUNIS } from "../lib/data";
 import { formatMs, type SaveData } from "../lib/storage";
 import MuniMap from "./MuniMap";
@@ -29,13 +29,6 @@ export default function Home({ save, onSelectPref }: Props) {
     return m ? `${m.n}（${m.k}）` : undefined;
   }, []);
 
-  const weak = useMemo(() => {
-    return Object.entries(save.muniStats)
-      .filter(([, s]) => s.miss > 0)
-      .sort((a, b) => b[1].miss - a[1].miss)
-      .slice(0, 10);
-  }, [save.muniStats]);
-
   return (
     <div className="home">
       <header className="home-header">
@@ -58,10 +51,11 @@ export default function Home({ save, onSelectPref }: Props) {
           <li>表示された市町村名を<b>ローマ字で入力</b>。「し」は si / shi など複数の打ち方でOK。</li>
           <li>末尾の「市・町・村・区」は<b>打たなくてOK</b>（名前の右に読みだけ表示）。</li>
           <li>
-            <b>ミスタイプするとその市町村は制覇にならない</b>よ。すでに制覇済みでも、ミスすると制覇が外れちゃう。
-            ノーミスで打ち切ってこそ制覇！
+            <b>ミスタイプするとその市町村は制覇にならないよ。制覇済みの場合も外れちゃう。</b> ノーミスで打ち切れ！
           </li>
-          <li>県内を全部打ち切ると<b>ベストタイム</b>を記録。全国1,741市区町村の完全制覇を目指そう🗾</li>
+          <li>
+            <b>ノーミス</b>で都道府県内の市町村を全部打ち切ると<b>ベストタイム</b>を記録。全国1,741市区町村の完全制覇を目指そう🗾
+          </li>
         </ul>
       </div>
 
@@ -99,25 +93,6 @@ export default function Home({ save, onSelectPref }: Props) {
           })}
         </div>
       </div>
-
-      {weak.length > 0 && (
-        <div className="weak-list">
-          <h3>苦手地名 TOP10</h3>
-          <ul>
-            {weak.map(([code, s]) => {
-              const m = muniByCode.get(code);
-              if (!m) return null;
-              return (
-                <li key={code}>
-                  <span className="mn">{m.n}</span>
-                  <span className="mk">{m.k}</span>
-                  <span className="mm">累計ミス {s.miss}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
 
       <footer className="credits">
         <p>
