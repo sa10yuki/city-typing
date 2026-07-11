@@ -3,7 +3,7 @@ import { munisByPref, prefName, shuffle, type Muni } from "../lib/data";
 import { TypingChallenge } from "../lib/romaji";
 import { playMiss, playType } from "../lib/sound";
 import { speakName, stopSpeech } from "../lib/speech";
-import { formatMs } from "../lib/storage";
+import { formatMsCoarse } from "../lib/storage";
 import MuniMap from "./MuniMap";
 
 export interface MuniResult {
@@ -212,8 +212,8 @@ function Timer({ started, startTime }: { started: boolean; startTime: number }) 
   const [now, setNow] = useState(0);
   useEffect(() => {
     if (!started) return;
-    const id = window.setInterval(() => setNow(performance.now()), 47);
+    const id = window.setInterval(() => setNow(performance.now()), 250);
     return () => window.clearInterval(id);
   }, [started]);
-  return <span className="timer">{formatMs(started ? Math.max(0, now - startTime) : 0)}</span>;
+  return <span className="timer">{formatMsCoarse(started ? Math.max(0, now - startTime) : 0)}</span>;
 }

@@ -48,3 +48,11 @@ export function formatMs(ms: number): string {
   const cs = Math.floor((t % 1000) / 10);
   return `${m}:${String(s).padStart(2, "0")}.${String(cs).padStart(2, "0")}`;
 }
+
+/** 秒未満を出さない表示（プレイ中のカウンター用） */
+export function formatMsCoarse(ms: number): string {
+  const t = Math.floor(ms);
+  const m = Math.floor(t / 60000);
+  const s = Math.floor((t % 60000) / 1000);
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
