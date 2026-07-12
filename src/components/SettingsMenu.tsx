@@ -108,7 +108,7 @@ export default function SettingsMenu() {
               <input
                 type="range"
                 min={0}
-                max={1}
+                max={1.6}
                 step={0.05}
                 value={s.voiceVolume}
                 disabled={!s.voiceEnabled}

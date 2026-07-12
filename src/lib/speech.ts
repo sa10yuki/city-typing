@@ -33,6 +33,19 @@ const SAMPLE_CODE = "01100"; // 試聴用（札幌市）
 
 let currentAudio: HTMLAudioElement | null = null;
 
+// 音量100%超の増幅のためWeb Audioのゲインを経由する
+let actx: AudioContext | null = null;
+const sourceCache = new WeakMap<HTMLAudioElement, MediaElementAudioSourceNode>();
+function audioCtx(): AudioContext | null {
+  try {
+    if (!actx) actx = new AudioContext();
+    if (actx.state === "suspended") void actx.resume();
+    return actx;
+  } catch {
+    return null;
+  }
+}
+
 function stopAudio(): void {
   if (currentAudio) {
     currentAudio.pause();
@@ -43,7 +56,25 @@ function stopAudio(): void {
 /** VOICEVOX音声を再生。失敗時は fallback() を一度だけ呼ぶ */
 function playClip(styleId: string, code: string, fallback: () => void): void {
   const audio = new Audio(`${VOICE_DIR}/${styleId}/${code}.opus`);
-  audio.volume = getSettings().voiceVolume;
+  const vol = getSettings().voiceVolume;
+  // 100%超はWeb Audioのゲインで増幅（対応しない環境は素のvolume・上限1.0）
+  const c = audioCtx();
+  if (c) {
+    try {
+      let src = sourceCache.get(audio);
+      if (!src) {
+        src = c.createMediaElementSource(audio);
+        sourceCache.set(audio, src);
+        const gain = c.createGain();
+        gain.gain.value = vol;
+        src.connect(gain).connect(c.destination);
+      }
+    } catch {
+      audio.volume = Math.min(1, vol);
+    }
+  } else {
+    audio.volume = Math.min(1, vol);
+  }
   currentAudio = audio;
   let fellBack = false;
   const goFallback = () => {
@@ -65,7 +96,7 @@ function speakTTS(kana: string): void {
     u.lang = "ja-JP";
     u.pitch = 1.3;
     u.rate = 1.1;
-    u.volume = getSettings().voiceVolume;
+    u.volume = Math.min(1, getSettings().voiceVolume);
     speechSynthesis.speak(u);
   } catch {
     // noop

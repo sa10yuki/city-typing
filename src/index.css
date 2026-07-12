@@ -675,7 +675,8 @@ button {
 }
 
 .play-question-col {
-  flex: 1;
+  flex: 0 0 400px;
+  max-width: 400px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -690,30 +691,30 @@ button {
 .kbd {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   align-items: center;
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 12px;
+  padding: 10px;
   user-select: none;
 }
 
 .kbd-row {
   display: flex;
-  gap: 6px;
+  gap: 5px;
   justify-content: center;
 }
 
 .kbd-key {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1.5px solid;
-  border-radius: 7px;
-  font-size: 13px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 700;
   transition: transform 0.08s, box-shadow 0.08s;
 }
@@ -723,7 +724,7 @@ button {
 }
 
 .kbd-space {
-  width: 180px;
+  width: 150px;
   background: #f1f5f9;
   border-color: #cbd5e1;
   color: var(--text-sub);
@@ -852,13 +853,21 @@ button {
 .play-body.layout-focus { flex-direction: column; }
 
 .play-map {
-  flex: 0 0 470px;
+  flex: 1 1 auto;
+  max-width: 680px;
 }
 
 .layout-map-top .play-map {
   flex: 0 0 auto;
   width: 100%;
-  max-width: 470px;
+  max-width: 560px;
+}
+
+.layout-map-top .play-question-col,
+.layout-focus .play-question-col {
+  flex: 0 0 auto;
+  max-width: 480px;
+  width: 100%;
 }
 
 .question-card {
