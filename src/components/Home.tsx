@@ -46,8 +46,8 @@ export default function Home({ save, onSelectPref, onOpenAtlas }: Props) {
       const h = prefHue(pid);
       const hovered = pid === hoverPref;
       const cleared = !!save.cleared[code];
-      // ホバー中の県は明るく強調
-      if (cleared) return hovered ? `hsl(${h} 78% 48%)` : `hsl(${h} 62% 55%)`;
+      // 制覇済みは濃くくっきり。ホバー中の県はさらに強調
+      if (cleared) return hovered ? `hsl(${h} 85% 34%)` : `hsl(${h} 72% 42%)`;
       return hovered ? `hsl(${h} 65% 78%)` : `hsl(${h} 40% 90%)`;
     },
     [save.cleared, hoverPref]
