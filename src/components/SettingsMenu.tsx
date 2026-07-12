@@ -133,6 +133,14 @@ export default function SettingsMenu() {
                 </button>
               ))}
             </div>
+            <label className="row" style={{ marginTop: 10 }}>
+              <span>キーボードマップを表示</span>
+              <input
+                type="checkbox"
+                checked={s.showKeyboard}
+                onChange={(e) => updateSettings({ showKeyboard: e.target.checked })}
+              />
+            </label>
           </section>
 
           <section>

@@ -16,6 +16,8 @@ export interface Settings {
   voiceId: string;
   /** タイピング画面の地図・お題の配置 */
   layout: Layout;
+  /** キーボードマップ（運指ガイド）を表示するか */
+  showKeyboard: boolean;
 }
 
 const KEY = "city-typing-settings";
@@ -28,6 +30,7 @@ const DEFAULTS: Settings = {
   voiceVolume: 1.0,
   voiceId: "vv:2",
   layout: "map-left",
+  showKeyboard: false,
 };
 
 function load(): Settings {

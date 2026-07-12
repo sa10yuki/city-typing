@@ -8,18 +8,28 @@ interface Props {
   onSelectPref: (prefId: number) => void;
 }
 
-const COLOR_CLEARED = "#6366f1";
-const COLOR_IDLE = "#e2e8f0";
 const COLOR_NULL = "#f1f5f9";
+
+// 都道府県ごとの色相（黄金角でばらけさせる）。制覇済みは濃く、未制覇は薄く塗る
+function prefHue(prefId: number): number {
+  return (prefId * 137.5) % 360;
+}
 
 export default function Home({ save, onSelectPref }: Props) {
   const clearedCount = Object.keys(save.cleared).length;
   const pct = ((clearedCount / TOTAL_MUNIS) * 100).toFixed(1);
 
+  // 日本スコア = 記録済み都道府県のベストタイム合計
+  const bestEntries = Object.values(save.prefBest);
+  const totalScore = bestEntries.reduce((a, b) => a + b, 0);
+  const recordedPrefs = bestEntries.length;
+
   const getFill = useCallback(
     (code: string | null) => {
       if (!code) return COLOR_NULL;
-      return save.cleared[code] ? COLOR_CLEARED : COLOR_IDLE;
+      const h = prefHue(Number(code.slice(0, 2)));
+      // 制覇済み: くっきり、未制覇: 淡い同系色
+      return save.cleared[code] ? `hsl(${h} 62% 55%)` : `hsl(${h} 40% 90%)`;
     },
     [save.cleared]
   );
@@ -41,6 +51,11 @@ export default function Home({ save, onSelectPref }: Props) {
           <div className="progress-bar">
             <div className="progress-fill" style={{ width: `${pct}%` }} />
           </div>
+        </div>
+        <div className="japan-score">
+          <span className="score-label">🏆 日本スコア（全県ベスト合計）</span>
+          <span className="score-value">{formatMs(totalScore)}</span>
+          <span className="score-sub">{recordedPrefs} / 47 県 記録済み</span>
         </div>
       </header>
 

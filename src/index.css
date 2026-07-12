@@ -518,6 +518,104 @@ button {
   margin-bottom: 18px;
 }
 
+.play-question-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.play-question-col .question-card {
+  flex: none;
+}
+
+/* ---------- キーボードマップ ---------- */
+.kbd {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  user-select: none;
+}
+
+.kbd-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.kbd-key {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+
+.kbd-key.active {
+  transform: translateY(-2px);
+}
+
+.kbd-space {
+  width: 180px;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: var(--text-sub);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+@media (max-width: 520px) {
+  .kbd-key {
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+  }
+  .kbd-space {
+    width: 130px;
+  }
+}
+
+/* ---------- 日本スコア ---------- */
+.japan-score {
+  margin: 16px auto 0;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--accent-soft);
+  border-radius: 12px;
+  padding: 12px 18px;
+}
+
+.score-label {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.score-value {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.score-sub {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
 .counter {
   color: var(--text-sub);
   font-size: 14px;

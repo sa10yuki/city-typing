@@ -6,6 +6,7 @@ import { speakMuni, stopSpeech } from "../lib/speech";
 import { useSettings } from "../lib/settings";
 import { formatMsCoarse } from "../lib/storage";
 import MuniMap from "./MuniMap";
+import KeyboardMap from "./KeyboardMap";
 
 export interface MuniResult {
   code: string;
@@ -35,7 +36,7 @@ const COLOR_CURRENT = "#f59e0b";
 const COLOR_IDLE = "#e2e8f0";
 
 export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish, onQuit }: Props) {
-  const { layout } = useSettings();
+  const { layout, showKeyboard } = useSettings();
   const queue = useMemo<Muni[]>(() => shuffle(munisByPref.get(prefId) ?? []), [prefId]);
   // ゲーム進行はすべてrefで持つ（高速連打時にレンダー待ちの古いstateを掴まないため）
   const idxRef = useRef(0);
@@ -188,29 +189,32 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
           </div>
         )}
 
-        <div className={`question-card${missFlash ? " miss-flash" : ""}`}>
-          {!started && <p className="hint">キーを打つとスタート！</p>}
-          {current && (
-            <>
-              <div className="q-name">
-                {current.b}
-                <ruby className="q-suffix">
-                  {current.n.slice(current.b.length)}
-                  <rt>{current.k.slice(current.bk.length)}</rt>
-                </ruby>
-              </div>
-              <div className="q-kana">
-                <span className="kana-done">{current.bk.slice(0, kanaDone)}</span>
-                <span className="kana-current">{current.bk.slice(kanaDone, kanaDone + curLen)}</span>
-                <span className="kana-rest">{current.bk.slice(kanaDone + curLen)}</span>
-              </div>
-              <div className="q-romaji">
-                <span className="romaji-done">{romajiDone}</span>
-                <span className="romaji-next">{romajiRest.slice(0, 1)}</span>
-                <span className="romaji-rest">{romajiRest.slice(1)}</span>
-              </div>
-            </>
-          )}
+        <div className="play-question-col">
+          <div className={`question-card${missFlash ? " miss-flash" : ""}`}>
+            {!started && <p className="hint">キーを打つとスタート！</p>}
+            {current && (
+              <>
+                <div className="q-name">
+                  {current.b}
+                  <ruby className="q-suffix">
+                    {current.n.slice(current.b.length)}
+                    <rt>{current.k.slice(current.bk.length)}</rt>
+                  </ruby>
+                </div>
+                <div className="q-kana">
+                  <span className="kana-done">{current.bk.slice(0, kanaDone)}</span>
+                  <span className="kana-current">{current.bk.slice(kanaDone, kanaDone + curLen)}</span>
+                  <span className="kana-rest">{current.bk.slice(kanaDone + curLen)}</span>
+                </div>
+                <div className="q-romaji">
+                  <span className="romaji-done">{romajiDone}</span>
+                  <span className="romaji-next">{romajiRest.slice(0, 1)}</span>
+                  <span className="romaji-rest">{romajiRest.slice(1)}</span>
+                </div>
+              </>
+            )}
+          </div>
+          {showKeyboard && <KeyboardMap nextKey={romajiRest.slice(0, 1)} />}
         </div>
       </div>
     </div>
