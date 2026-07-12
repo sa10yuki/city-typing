@@ -350,14 +350,14 @@ button {
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 18px 24px;
-  margin: 0 auto 24px;
+  padding: 10px 24px;
+  margin: 0 auto 18px;
   max-width: 760px;
 }
 
 .rules h2 {
-  font-size: 15px;
-  margin-bottom: 8px;
+  font-size: 14px;
+  margin-bottom: 4px;
   color: var(--accent);
 }
 
@@ -368,7 +368,7 @@ button {
 
 .rules li {
   font-size: 12px;
-  line-height: 1.65;
+  line-height: 1.5;
   color: var(--text);
 }
 

@@ -3,6 +3,8 @@
 interface Props {
   /** 次に打つキー（小文字1文字 / "-"）。無ければ何も光らない */
   nextKey: string;
+  /** 直近にミスしたキー（暗色で点灯） */
+  missKey?: string;
 }
 
 // 指の識別子と色（左手=暖色、右手=寒色）
@@ -39,8 +41,9 @@ const ROWS: string[][] = [
 // 各行の左インデント（キーボードらしいずらし）
 const ROW_INDENT = [0, 0, 0.5, 1];
 
-export default function KeyboardMap({ nextKey }: Props) {
+export default function KeyboardMap({ nextKey, missKey }: Props) {
   const next = nextKey.toLowerCase();
+  const miss = (missKey ?? "").toLowerCase();
   return (
     <div className="kbd" aria-hidden="true">
       {ROWS.map((row, ri) => (
@@ -49,17 +52,27 @@ export default function KeyboardMap({ nextKey }: Props) {
             const finger = KEY_FINGER[k];
             const color = finger ? FINGERS[finger] : "#cbd5e1";
             const active = k === next;
-            return (
-              <span
-                key={k}
-                className={`kbd-key${active ? " active" : ""}`}
-                style={{
+            const missed = !active && k === miss;
+            const style = missed
+              ? {
+                  // ミスしたキーは暗色で点灯
+                  background: "#334155",
+                  borderColor: "#1e293b",
+                  color: "#fff",
+                  boxShadow: "0 0 0 3px rgba(51,65,85,0.4), 0 0 12px #334155",
+                }
+              : {
                   // 通常は指色を薄く、次キーは指色でくっきり光らせる
                   background: active ? color : `${color}22`,
                   borderColor: active ? color : `${color}66`,
                   color: active ? "#fff" : "var(--text)",
                   boxShadow: active ? `0 0 0 3px ${color}55, 0 0 12px ${color}` : undefined,
-                }}
+                };
+            return (
+              <span
+                key={k}
+                className={`kbd-key${active ? " active" : ""}${missed ? " missed" : ""}`}
+                style={style}
               >
                 {k.toUpperCase()}
               </span>

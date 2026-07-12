@@ -30,7 +30,7 @@ const DEFAULTS: Settings = {
   voiceVolume: 1.0,
   voiceId: "vv:2",
   layout: "map-left",
-  showKeyboard: false,
+  showKeyboard: true,
 };
 
 function load(): Settings {

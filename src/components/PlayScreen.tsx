@@ -54,6 +54,7 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
   const [, setTick] = useState(0);
   const [started, setStarted] = useState(false);
   const [missFlash, setMissFlash] = useState(false);
+  const [missKey, setMissKey] = useState(""); // 直近にミスしたキー（キーボードで暗色点灯）
 
   if (challengeRef.current === null && queue.length > 0) {
     challengeRef.current = new TypingChallenge(queue[0].bk);
@@ -89,6 +90,8 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
         qMissRef.current += 1;
         setMissFlash(true);
         window.setTimeout(() => setMissFlash(false), 120);
+        setMissKey(ch);
+        window.setTimeout(() => setMissKey((k) => (k === ch ? "" : k)), 250);
         setTick((t) => t + 1);
         return;
       }
@@ -214,7 +217,7 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
               </>
             )}
           </div>
-          {showKeyboard && <KeyboardMap nextKey={romajiRest.slice(0, 1)} />}
+          {showKeyboard && <KeyboardMap nextKey={romajiRest.slice(0, 1)} missKey={missKey} />}
         </div>
       </div>
     </div>

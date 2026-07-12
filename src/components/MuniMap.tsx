@@ -194,10 +194,14 @@ export default function MuniMap({
           {highlight.items.map((p, i) => (
             <path key={i} d={p.d} fill="none" stroke="#d97706" strokeWidth={1.8} />
           ))}
-          <circle cx={highlight.cx} cy={highlight.cy} r={3} fill="#d97706" />
-          <circle cx={highlight.cx} cy={highlight.cy} fill="none" stroke="#d97706" strokeWidth={2}>
-            <animate attributeName="r" values="4;18" dur="1.1s" repeatCount="indefinite" />
-            <animate attributeName="opacity" values="0.9;0" dur="1.1s" repeatCount="indefinite" />
+          <circle cx={highlight.cx} cy={highlight.cy} r={4} fill="#d97706" />
+          <circle cx={highlight.cx} cy={highlight.cy} fill="none" stroke="#d97706" strokeWidth={3}>
+            <animate attributeName="r" values="6;46" dur="1.2s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.95;0" dur="1.2s" repeatCount="indefinite" />
+          </circle>
+          <circle cx={highlight.cx} cy={highlight.cy} fill="none" stroke="#d97706" strokeWidth={2.5}>
+            <animate attributeName="r" values="6;46" dur="1.2s" begin="0.6s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.95;0" dur="1.2s" begin="0.6s" repeatCount="indefinite" />
           </circle>
         </g>
       )}
