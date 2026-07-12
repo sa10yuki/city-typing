@@ -57,6 +57,8 @@ export interface MuniMapProps {
   getLabel?: (code: string) => string | undefined;
   /** ラベルの倍率補正（拡大時に文字を相対的に小さくして画面上サイズを一定に保つ） */
   labelScale?: number;
+  /** viewBox上書き（ベクターのまま拡大するズーム用）。未指定なら全体表示 */
+  viewBox?: string;
   /** 都道府県ホバー通知（トップ地図用）。prefId(1-47) or null */
   onHoverPref?: (prefId: number | null) => void;
 }
@@ -79,6 +81,7 @@ export default function MuniMap({
   labels = false,
   getLabel,
   labelScale = 1,
+  viewBox,
   onHoverPref,
 }: MuniMapProps) {
   const clipId = useId();
@@ -155,7 +158,7 @@ export default function MuniMap({
 
   return (
     <svg
-      viewBox={`0 0 ${width} ${height}`}
+      viewBox={viewBox ?? `0 0 ${width} ${height}`}
       className="muni-map"
       role="img"
       aria-label={prefId ? "都道府県地図" : "日本地図"}

@@ -448,13 +448,9 @@ button {
   overflow: hidden;
 }
 
-.atlas-stage {
-  transform-origin: 0 0;
-  will-change: transform;
-}
-
-.atlas-stage .muni-map {
+.atlas-viewport .muni-map {
   cursor: inherit;
+  display: block;
 }
 
 .atlas-zoom {
@@ -535,7 +531,7 @@ button {
 .pref-list {
   flex: 0 1 400px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 7px;
   max-height: 640px;
   overflow-y: auto;
@@ -597,6 +593,7 @@ button {
   font-weight: 700;
   font-size: 13px;
   padding-right: 30px;
+  white-space: nowrap;
 }
 
 .pref-progress {

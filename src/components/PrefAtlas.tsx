@@ -16,8 +16,10 @@ function tint(code: string): string {
   return `hsl(${h} 55% 88%)`;
 }
 
+const W = 900;
+const H = 720;
 const MIN_SCALE = 1;
-const MAX_SCALE = 6;
+const MAX_SCALE = 12;
 
 export default function PrefAtlas({ prefId, onBack, onPlay }: Props) {
   const list = munisByPref.get(prefId) ?? [];
@@ -32,34 +34,70 @@ export default function PrefAtlas({ prefId, onBack, onPlay }: Props) {
     return m ? `${m.n}（${m.k}）` : undefined;
   }, []);
 
-  // ズーム・パン
-  const [scale, setScale] = useState(1);
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
+  // viewBox方式のズーム: 中心(cx,cy)とscaleで管理（ベクターのまま拡大＝クッキリ）
+  const [view, setView] = useState({ cx: W / 2, cy: H / 2, scale: 1 });
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ mx: number; my: number; cx: number; cy: number } | null>(null);
 
-  const zoomBy = (factor: number) => {
-    setScale((s) => {
-      const ns = Math.min(MAX_SCALE, Math.max(MIN_SCALE, s * factor));
-      if (ns === MIN_SCALE) setPos({ x: 0, y: 0 }); // 等倍に戻したら中央へ
-      return ns;
+  const vw = W / view.scale;
+  const vh = H / view.scale;
+  const viewBox = `${view.cx - vw / 2} ${view.cy - vh / 2} ${vw} ${vh}`;
+
+  // 中心・scaleを枠内に収める
+  const clamp = (cx: number, cy: number, scale: number) => {
+    const s = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale));
+    const w = W / s;
+    const h = H / s;
+    return {
+      scale: s,
+      cx: Math.min(W - w / 2, Math.max(w / 2, cx)),
+      cy: Math.min(H - h / 2, Math.max(h / 2, cy)),
+    };
+  };
+
+  // 画面座標(mx,my)を軸に factor 倍ズームする
+  const zoomAt = (mx: number, my: number, factor: number) => {
+    setView((v) => {
+      const rect = viewportRef.current?.getBoundingClientRect();
+      if (!rect) return v;
+      const fx = (mx - rect.left) / rect.width; // 0..1
+      const fy = (my - rect.top) / rect.height;
+      const cvw = W / v.scale;
+      const cvh = H / v.scale;
+      // カーソル位置のユーザー座標
+      const ux = v.cx - cvw / 2 + fx * cvw;
+      const uy = v.cy - cvh / 2 + fy * cvh;
+      const ns = Math.min(MAX_SCALE, Math.max(MIN_SCALE, v.scale * factor));
+      const nvw = W / ns;
+      const nvh = H / ns;
+      // カーソル位置を固定したまま新しい中心を求める
+      const ncx = ux + (0.5 - fx) * nvw;
+      const ncy = uy + (0.5 - fy) * nvh;
+      return clamp(ncx, ncy, ns);
     });
   };
-  const reset = () => {
-    setScale(1);
-    setPos({ x: 0, y: 0 });
+
+  const zoomCenter = (factor: number) => {
+    const rect = viewportRef.current?.getBoundingClientRect();
+    if (rect) zoomAt(rect.left + rect.width / 2, rect.top + rect.height / 2, factor);
   };
+  const reset = () => setView({ cx: W / 2, cy: H / 2, scale: 1 });
 
   const onWheel = (e: React.WheelEvent) => {
     e.preventDefault();
-    zoomBy(e.deltaY < 0 ? 1.15 : 1 / 1.15);
+    zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.2 : 1 / 1.2);
   };
   const onDown = (e: React.MouseEvent) => {
-    if (scale <= 1) return;
-    drag.current = { x: e.clientX, y: e.clientY, px: pos.x, py: pos.y };
+    if (view.scale <= 1) return;
+    drag.current = { mx: e.clientX, my: e.clientY, cx: view.cx, cy: view.cy };
   };
   const onMove = (e: React.MouseEvent) => {
     if (!drag.current) return;
-    setPos({ x: drag.current.px + (e.clientX - drag.current.x), y: drag.current.py + (e.clientY - drag.current.y) });
+    const rect = viewportRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const dxUser = ((e.clientX - drag.current.mx) / rect.width) * vw;
+    const dyUser = ((e.clientY - drag.current.my) / rect.height) * vh;
+    setView((v) => clamp(drag.current!.cx - dxUser, drag.current!.cy - dyUser, v.scale));
   };
   const endDrag = () => {
     drag.current = null;
@@ -86,15 +124,15 @@ export default function PrefAtlas({ prefId, onBack, onPlay }: Props) {
       </header>
 
       <p className="atlas-hint">
-        🔊 市区町村をクリックで読み上げ ／ 🔍 マウスホイールや ＋−ボタンで拡大縮小（拡大中はドラッグで移動）
+        🔊 市区町村をクリックで読み上げ ／ 🔍 マウス位置を中心にホイールや ＋−ボタンで拡大縮小（拡大中はドラッグで移動）
       </p>
 
       <div className="atlas-map">
         <div className="atlas-zoom">
-          <button onClick={() => zoomBy(1.4)} aria-label="拡大">
+          <button onClick={() => zoomCenter(1.5)} aria-label="拡大">
             ＋
           </button>
-          <button onClick={() => zoomBy(1 / 1.4)} aria-label="縮小">
+          <button onClick={() => zoomCenter(1 / 1.5)} aria-label="縮小">
             －
           </button>
           <button onClick={reset} aria-label="リセット" className="atlas-zoom-reset">
@@ -103,32 +141,29 @@ export default function PrefAtlas({ prefId, onBack, onPlay }: Props) {
         </div>
         <div
           className="atlas-viewport"
+          ref={viewportRef}
           onWheel={onWheel}
           onMouseDown={onDown}
           onMouseMove={onMove}
           onMouseUp={endDrag}
           onMouseLeave={endDrag}
-          style={{ cursor: scale > 1 ? (drag.current ? "grabbing" : "grab") : "default" }}
+          style={{ cursor: view.scale > 1 ? (drag.current ? "grabbing" : "grab") : "default" }}
         >
-          <div
-            className="atlas-stage"
-            style={{ transform: `translate(${pos.x}px, ${pos.y}px) scale(${scale})` }}
-          >
-            <MuniMap
-              prefId={prefId}
-              width={900}
-              height={720}
-              getFill={getFill}
-              getTitle={getTitle}
-              labels
-              getLabel={getLabel}
-              labelScale={scale}
-              onClickMuni={(code) => {
-                const m = muniByCode.get(code);
-                if (m) speakMuni(m.c, m.k);
-              }}
-            />
-          </div>
+          <MuniMap
+            prefId={prefId}
+            width={W}
+            height={H}
+            viewBox={viewBox}
+            getFill={getFill}
+            getTitle={getTitle}
+            labels
+            getLabel={getLabel}
+            labelScale={view.scale}
+            onClickMuni={(code) => {
+              const m = muniByCode.get(code);
+              if (m) speakMuni(m.c, m.k);
+            }}
+          />
         </div>
       </div>
     </div>
