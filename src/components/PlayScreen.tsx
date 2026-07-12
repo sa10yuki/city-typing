@@ -55,6 +55,26 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
   const [started, setStarted] = useState(false);
   const [missFlash, setMissFlash] = useState(false);
   const [missKey, setMissKey] = useState(""); // 直近にミスしたキー（キーボードで暗色点灯）
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  const pauseStartRef = useRef(0);
+
+  const togglePause = useCallback(() => {
+    // 開始前は一時停止しない
+    if (startTimeRef.current === 0 || finishedRef.current) return;
+    if (!pausedRef.current) {
+      pausedRef.current = true;
+      pauseStartRef.current = performance.now();
+      setPaused(true);
+    } else {
+      // 停止していた時間ぶんだけ計測開始時刻をずらす
+      const delta = performance.now() - pauseStartRef.current;
+      startTimeRef.current += delta;
+      qStartRef.current += delta;
+      pausedRef.current = false;
+      setPaused(false);
+    }
+  }, []);
 
   if (challengeRef.current === null && queue.length > 0) {
     challengeRef.current = new TypingChallenge(queue[0].bk);
@@ -71,7 +91,7 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
       if (!/^[a-z-]$/.test(ch)) return;
       e.preventDefault();
 
-      if (finishedRef.current) return;
+      if (finishedRef.current || pausedRef.current) return;
       const challenge = challengeRef.current;
       const current = queue[idxRef.current];
       if (!challenge || !current) return;
@@ -173,8 +193,15 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
         <span className="counter">
           {Math.min(idx + 1, queue.length)} / {queue.length}
         </span>
-        <Timer started={started} startTime={startTimeRef.current} />
+        <Timer started={started} startTime={startTimeRef.current} paused={paused} />
         <span className="miss-count">ミス {missTotalRef.current}</span>
+        <button
+          className="btn-pause"
+          onClick={togglePause}
+          disabled={!started || finishedRef.current}
+        >
+          {paused ? "▶ 再開" : "⏸ 一時停止"}
+        </button>
       </div>
 
       <div className={`play-body layout-${layout}`}>
@@ -194,8 +221,16 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
 
         <div className="play-question-col">
           <div className={`question-card${missFlash ? " miss-flash" : ""}`}>
+            {paused && (
+              <div className="pause-overlay">
+                <span className="pause-title">⏸ 一時停止中</span>
+                <button className="btn primary" onClick={togglePause}>
+                  ▶ 再開
+                </button>
+              </div>
+            )}
             {!started && <p className="hint">キーを打つとスタート！</p>}
-            {current && (
+            {current && !paused && (
               <>
                 <div className="q-name">
                   {current.b}
@@ -224,12 +259,21 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
   );
 }
 
-function Timer({ started, startTime }: { started: boolean; startTime: number }) {
+function Timer({
+  started,
+  startTime,
+  paused,
+}: {
+  started: boolean;
+  startTime: number;
+  paused: boolean;
+}) {
   const [now, setNow] = useState(0);
   useEffect(() => {
-    if (!started) return;
+    if (!started || paused) return; // 一時停止中は更新を止めて表示を固定
+    setNow(performance.now());
     const id = window.setInterval(() => setNow(performance.now()), 250);
     return () => window.clearInterval(id);
-  }, [started]);
+  }, [started, paused]);
   return <span className="timer">{formatMsCoarse(started ? Math.max(0, now - startTime) : 0)}</span>;
 }

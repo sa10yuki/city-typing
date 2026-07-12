@@ -383,7 +383,7 @@ button {
 }
 
 .home-map {
-  flex: 1 1 580px;
+  flex: 1 1 500px;
   min-width: 0;
   position: sticky;
   top: 16px;
@@ -395,6 +395,53 @@ button {
   display: block;
 }
 
+.muni-label {
+  font-size: 9px;
+  fill: #1e293b;
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  pointer-events: none;
+  font-weight: 600;
+}
+
+/* ---------- 地図帳（アトラス） ---------- */
+.atlas-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.atlas-header h2 {
+  font-size: 20px;
+  flex: 1;
+}
+
+.atlas-count {
+  font-size: 13px;
+  color: var(--text-sub);
+  font-weight: 400;
+}
+
+.atlas-hint {
+  color: var(--text-sub);
+  font-size: 12px;
+  margin: 0 0 12px;
+}
+
+.atlas-map {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.atlas-map .muni-map {
+  cursor: pointer;
+}
+
 .map-hint {
   text-align: center;
   color: var(--text-sub);
@@ -402,25 +449,20 @@ button {
 }
 
 .pref-list {
-  flex: 0 0 380px;
+  flex: 1 1 540px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
   max-height: 640px;
   overflow-y: auto;
   padding-right: 4px;
 }
 
 .pref-card {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  position: relative;
   border: 1px solid var(--border);
   background: #fff;
   border-radius: 8px;
-  padding: 8px 10px;
-  cursor: pointer;
-  text-align: left;
   transition: border-color 0.15s, background 0.15s;
 }
 
@@ -434,9 +476,41 @@ button {
   border-color: var(--accent);
 }
 
+.pref-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pref-atlas-btn {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  line-height: 1;
+  padding: 2px;
+  cursor: pointer;
+  opacity: 0.55;
+  border-radius: 5px;
+}
+
+.pref-atlas-btn:hover {
+  opacity: 1;
+  background: #fff;
+}
+
 .pref-name {
   font-weight: 700;
   font-size: 13px;
+  padding-right: 16px;
 }
 
 .pref-progress {
@@ -636,6 +710,47 @@ button {
   font-weight: 700;
 }
 
+.btn-pause {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-pause:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.btn-pause:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pause-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 16px;
+  z-index: 5;
+}
+
+.pause-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+
 .miss-count {
   color: var(--text-sub);
   font-size: 14px;
@@ -664,6 +779,7 @@ button {
 }
 
 .question-card {
+  position: relative;
   flex: 1;
   background: #fff;
   border: 1px solid var(--border);

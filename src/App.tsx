@@ -3,10 +3,12 @@ import Home from "./components/Home";
 import PlayScreen, { type MuniResult, type RunResult } from "./components/PlayScreen";
 import ResultScreen from "./components/ResultScreen";
 import SettingsMenu from "./components/SettingsMenu";
+import PrefAtlas from "./components/PrefAtlas";
 import { loadSave, persistSave, type SaveData } from "./lib/storage";
 
 type View =
   | { t: "home" }
+  | { t: "atlas"; prefId: number }
   | { t: "play"; prefId: number; runKey: number }
   | { t: "result"; result: RunResult; isBest: boolean; best?: number };
 
@@ -74,10 +76,21 @@ export default function App() {
     setView({ t: "play", prefId, runKey: runKeyRef.current });
   }, []);
 
+  const openAtlas = useCallback((prefId: number) => {
+    setView({ t: "atlas", prefId });
+  }, []);
+
   return (
     <div className="app">
       <SettingsMenu />
-      {view.t === "home" && <Home save={save} onSelectPref={startPlay} />}
+      {view.t === "home" && <Home save={save} onSelectPref={startPlay} onOpenAtlas={openAtlas} />}
+      {view.t === "atlas" && (
+        <PrefAtlas
+          prefId={view.prefId}
+          onBack={() => setView({ t: "home" })}
+          onPlay={startPlay}
+        />
+      )}
       {view.t === "play" && (
         <PlayScreen
           key={view.runKey}

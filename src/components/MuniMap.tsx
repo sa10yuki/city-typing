@@ -51,6 +51,10 @@ export interface MuniMapProps {
   highlightCode?: string;
   /** 地形（陰影起伏）をうっすら重ねるか */
   terrain?: boolean;
+  /** 市区町村名のラベルを表示するか（地図帳表示用） */
+  labels?: boolean;
+  /** ラベル文字列を返す関数 */
+  getLabel?: (code: string) => string | undefined;
 }
 
 interface PathEntry {
@@ -68,9 +72,11 @@ export default function MuniMap({
   getTitle,
   highlightCode,
   terrain = false,
+  labels = false,
+  getLabel,
 }: MuniMapProps) {
   const clipId = useId();
-  const { paths, lakePaths, pathGen, tiles, tileScale, tileTranslate } = useMemo(() => {
+  const { paths, lakePaths, labelPos, pathGen, tiles, tileScale, tileTranslate } = useMemo(() => {
     const pp = prefId ? String(prefId).padStart(2, "0") : null;
     const features = pp
       ? fc.features.filter((f) => f.properties.c?.startsWith(pp))
@@ -92,6 +98,19 @@ export default function MuniMap({
       .map((f) => pathGen(f) ?? "")
       .filter((d) => d !== "");
 
+    // ラベル位置: 市区町村コードごとに最大ポリゴンの重心を採用
+    const byCode = new Map<string, { x: number; y: number; area: number }>();
+    for (const p of paths) {
+      if (!p.code) continue;
+      const a = pathGen.area(p.f);
+      const prev = byCode.get(p.code);
+      if (!prev || a > prev.area) {
+        const [x, y] = pathGen.centroid(p.f);
+        byCode.set(p.code, { x, y, area: a });
+      }
+    }
+    const labelPos = [...byCode.entries()].map(([code, { x, y }]) => ({ code, x, y }));
+
     // 陰影起伏タイルの配置（Webメルカトルのスケール・平行移動をd3-tileで算出）
     const t = d3tile()
       .size([width, height])
@@ -100,6 +119,7 @@ export default function MuniMap({
     return {
       paths,
       lakePaths,
+      labelPos,
       pathGen,
       tiles: t as unknown as [number, number, number][],
       tileScale: (t as unknown as { scale: number }).scale,
@@ -188,6 +208,17 @@ export default function MuniMap({
           </g>
         </>
       )}
+
+      {labels &&
+        labelPos.map((l) => {
+          const text = getLabel?.(l.code);
+          if (!text) return null;
+          return (
+            <text key={l.code} className="muni-label" x={l.x} y={l.y} textAnchor="middle">
+              {text}
+            </text>
+          );
+        })}
 
       {highlight && (
         <g pointerEvents="none">

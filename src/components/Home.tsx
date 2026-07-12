@@ -6,6 +6,7 @@ import MuniMap from "./MuniMap";
 interface Props {
   save: SaveData;
   onSelectPref: (prefId: number) => void;
+  onOpenAtlas: (prefId: number) => void;
 }
 
 const COLOR_NULL = "#f1f5f9";
@@ -15,7 +16,7 @@ function prefHue(prefId: number): number {
   return (prefId * 137.5) % 360;
 }
 
-export default function Home({ save, onSelectPref }: Props) {
+export default function Home({ save, onSelectPref, onOpenAtlas }: Props) {
   const clearedCount = Object.keys(save.cleared).length;
   const pct = ((clearedCount / TOTAL_MUNIS) * 100).toFixed(1);
 
@@ -96,17 +97,22 @@ export default function Home({ save, onSelectPref }: Props) {
             const best = save.prefBest[p.id];
             const done = cleared === list.length && list.length > 0;
             return (
-              <button
-                key={p.id}
-                className={`pref-card${done ? " done" : ""}`}
-                onClick={() => onSelectPref(p.id)}
-              >
-                <span className="pref-name">{p.name}</span>
-                <span className="pref-progress">
-                  {cleared}/{list.length}
-                </span>
-                <span className="pref-best">{best ? formatMs(best) : "--:--.--"}</span>
-              </button>
+              <div key={p.id} className={`pref-card${done ? " done" : ""}`}>
+                <button className="pref-card-main" onClick={() => onSelectPref(p.id)}>
+                  <span className="pref-name">{p.name}</span>
+                  <span className="pref-progress">
+                    {cleared}/{list.length}
+                  </span>
+                  <span className="pref-best">{best ? formatMs(best) : "--:--.--"}</span>
+                </button>
+                <button
+                  className="pref-atlas-btn"
+                  title={`${p.name}の市区町村を地図で見る`}
+                  onClick={() => onOpenAtlas(p.id)}
+                >
+                  🗺
+                </button>
+              </div>
             );
           })}
         </div>
