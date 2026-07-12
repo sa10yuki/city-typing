@@ -274,6 +274,49 @@ button {
   color: var(--text-sub);
 }
 
+.mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.mode-opt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.mode-opt:hover {
+  border-color: var(--accent);
+}
+
+.mode-opt.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.mode-label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--accent);
+}
+
+.mode-desc {
+  font-size: 10px;
+  color: var(--text-sub);
+  text-align: center;
+  line-height: 1.4;
+}
+
 .reset-btn {
   width: 100%;
   padding: 9px 12px;

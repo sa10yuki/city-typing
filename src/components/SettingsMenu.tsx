@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { updateSettings, useSettings, type Layout } from "../lib/settings";
+import { updateSettings, useSettings, type GameMode, type Layout } from "../lib/settings";
 import { previewVoice, VOICE_OPTIONS } from "../lib/speech";
 import { clearRecords } from "../lib/storage";
 
@@ -8,6 +8,11 @@ const LAYOUTS: { id: Layout; label: string; icon: string }[] = [
   { id: "map-right", label: "地図 右", icon: "◨" },
   { id: "map-top", label: "地図 上", icon: "⬒" },
   { id: "focus", label: "地図なし", icon: "▢" },
+];
+
+const GAME_MODES: { id: GameMode; label: string; desc: string }[] = [
+  { id: "hard", label: "HARD", desc: "制覇済みでもミスすると外れる" },
+  { id: "easy", label: "EASY", desc: "一度制覇したら外れない" },
 ];
 
 export default function SettingsMenu() {
@@ -44,6 +49,24 @@ export default function SettingsMenu() {
       {open && (
         <div className="settings-panel" role="dialog" aria-label="設定">
           <h3>設定</h3>
+
+          <section>
+            <div className="row">
+              <span>ゲームモード</span>
+            </div>
+            <div className="mode-grid">
+              {GAME_MODES.map((m) => (
+                <button
+                  key={m.id}
+                  className={`mode-opt${s.gameMode === m.id ? " active" : ""}`}
+                  onClick={() => updateSettings({ gameMode: m.id })}
+                >
+                  <span className="mode-label">{m.label}</span>
+                  <span className="mode-desc">{m.desc}</span>
+                </button>
+              ))}
+            </div>
+          </section>
 
           <section>
             <label className="row">

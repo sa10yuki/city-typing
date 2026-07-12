@@ -5,6 +5,7 @@ import ResultScreen from "./components/ResultScreen";
 import SettingsMenu from "./components/SettingsMenu";
 import PrefAtlas from "./components/PrefAtlas";
 import { loadSave, persistSave, type SaveData } from "./lib/storage";
+import { useSettings } from "./lib/settings";
 
 type View =
   | { t: "home" }
@@ -16,6 +17,7 @@ export default function App() {
   const [save, setSave] = useState<SaveData>(loadSave);
   const [view, setView] = useState<View>({ t: "home" });
   const runKeyRef = useRef(0);
+  const { gameMode } = useSettings();
 
   const update = useCallback((updater: (d: SaveData) => SaveData) => {
     setSave((prev) => {
@@ -29,12 +31,13 @@ export default function App() {
     (r: MuniResult) => {
       update((d) => {
         const stat = d.muniStats[r.code] ?? { miss: 0, clears: 0, totalMs: 0 };
-        // ノーミスで打ち切ったときだけ制覇。ミスがあれば制覇にならず、
-        // 既に制覇済みでもその回で制覇が外れる。
+        // ノーミスで打ち切ったときだけ制覇。
+        // HARD: ミスがあれば、既に制覇済みでもその回で制覇が外れる。
+        // EASY: ミスしても、既に制覇済みならそのまま維持する（新規制覇はノーミス時のみ変わらず）。
         const cleared = { ...d.cleared };
         if (r.miss === 0) {
           cleared[r.code] = 1;
-        } else {
+        } else if (gameMode === "hard") {
           delete cleared[r.code];
         }
         return {
@@ -51,7 +54,7 @@ export default function App() {
         };
       });
     },
-    [update]
+    [update, gameMode]
   );
 
   const handleFinish = useCallback(

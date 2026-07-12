@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { munisByPref, muniByCode, prefName, prefs, TOTAL_MUNIS } from "../lib/data";
+import { useSettings } from "../lib/settings";
 import { formatMs, type SaveData } from "../lib/storage";
 import MuniMap from "./MuniMap";
 
@@ -17,6 +18,7 @@ function prefHue(prefId: number): number {
 }
 
 export default function Home({ save, onSelectPref, onOpenAtlas }: Props) {
+  const { gameMode } = useSettings();
   const clearedCount = Object.keys(save.cleared).length;
   const pct = ((clearedCount / TOTAL_MUNIS) * 100).toFixed(1);
 
@@ -88,10 +90,16 @@ export default function Home({ save, onSelectPref, onOpenAtlas }: Props) {
           <li>表示された市町村名を<b>ローマ字で入力</b>。「し」は si / shi など複数の打ち方でOK。</li>
           <li>末尾の「市・町・村・区」は<b>打たなくてOK</b>（名前の右に読みだけ表示）。</li>
           <li>
-            <b>ミスタイプするとその市町村は制覇にならないよ。制覇済みの場合も外れちゃう。</b> ノーミスで打ち切れ！
+            <b>ミスタイプするとその市町村はその回では制覇にならないよ。</b>
+            {gameMode === "hard" ? (
+              <> 既に制覇済みでも<b>ミスすると制覇が外れる（現在: HARDモード）</b>。ノーミスで打ち切れ！</>
+            ) : (
+              <> ただし<b>一度制覇した市町村はミスしても外れない（現在: EASYモード）</b>。</>
+            )}{" "}
+            モードは設定で切り替えられるよ。
           </li>
           <li>
-            <b>ノーミス</b>で都道府県内の市町村を全部打ち切ると<b>ベストタイム</b>を記録。全国1,741市区町村の完全制覇を目指そう🗾
+            <b>ノーミス</b>で都道府県内の市町村を全部打ち切ると<b>ベストタイム</b>を記録。ベストタイムは一度記録したら消えないよ。全国1,741市区町村の完全制覇を目指そう🗾
           </li>
           <li>
             各県の<b>地図</b>ボタンで、その県の市区町村を地図帳のように一覧できるよ（クリックで読み上げ・拡大縮小もOK）。

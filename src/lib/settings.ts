@@ -3,6 +3,13 @@ import { useSyncExternalStore } from "react";
 
 export type Layout = "map-left" | "map-right" | "map-top" | "focus";
 
+/**
+ * ミスタイプ時、既に制覇済みの市町村の扱い。
+ * hard: 制覇済みでもミスすると制覇が外れる（従来の挙動）
+ * easy: 一度制覇した市町村はミスしても制覇が外れない
+ */
+export type GameMode = "easy" | "hard";
+
 export interface Settings {
   /** タイプ音・ミス音を鳴らすか */
   typeSound: boolean;
@@ -18,6 +25,8 @@ export interface Settings {
   layout: Layout;
   /** キーボードマップ（運指ガイド）を表示するか */
   showKeyboard: boolean;
+  /** ゲームモード（EASY/HARD） */
+  gameMode: GameMode;
 }
 
 const KEY = "city-typing-settings";
@@ -31,6 +40,7 @@ const DEFAULTS: Settings = {
   voiceId: "vv:2",
   layout: "map-left",
   showKeyboard: true,
+  gameMode: "hard",
 };
 
 function load(): Settings {
