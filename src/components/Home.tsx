@@ -134,7 +134,7 @@ export default function Home({ save, onSelectPref, onOpenAtlas }: Props) {
                   title={`${p.name}の市区町村を地図で見る`}
                   onClick={() => onOpenAtlas(p.id)}
                 >
-                  🗺 地図
+                  地図
                 </button>
               </div>
             );

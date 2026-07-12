@@ -122,6 +122,7 @@ export default function PrefAtlas({ prefId, onBack, onPlay }: Props) {
               getTitle={getTitle}
               labels
               getLabel={getLabel}
+              labelScale={scale}
               onClickMuni={(code) => {
                 const m = muniByCode.get(code);
                 if (m) speakMuni(m.c, m.k);

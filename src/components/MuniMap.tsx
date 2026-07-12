@@ -55,6 +55,8 @@ export interface MuniMapProps {
   labels?: boolean;
   /** ラベル文字列を返す関数 */
   getLabel?: (code: string) => string | undefined;
+  /** ラベルの倍率補正（拡大時に文字を相対的に小さくして画面上サイズを一定に保つ） */
+  labelScale?: number;
   /** 都道府県ホバー通知（トップ地図用）。prefId(1-47) or null */
   onHoverPref?: (prefId: number | null) => void;
 }
@@ -76,6 +78,7 @@ export default function MuniMap({
   terrain = false,
   labels = false,
   getLabel,
+  labelScale = 1,
   onHoverPref,
 }: MuniMapProps) {
   const clipId = useId();
@@ -221,7 +224,14 @@ export default function MuniMap({
           const text = getLabel?.(l.code);
           if (!text) return null;
           return (
-            <text key={l.code} className="muni-label" x={l.x} y={l.y} textAnchor="middle">
+            <text
+              key={l.code}
+              className="muni-label"
+              x={l.x}
+              y={l.y}
+              textAnchor="middle"
+              style={{ fontSize: `${9 / labelScale}px`, strokeWidth: `${2 / labelScale}px` }}
+            >
               {text}
             </text>
           );

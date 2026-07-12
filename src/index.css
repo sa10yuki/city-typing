@@ -383,7 +383,7 @@ button {
 }
 
 .home-map {
-  flex: 1 1 500px;
+  flex: 1 1 640px;
   min-width: 0;
   position: sticky;
   top: 16px;
@@ -533,7 +533,7 @@ button {
 }
 
 .pref-list {
-  flex: 1 1 460px;
+  flex: 0 1 400px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 7px;
@@ -582,7 +582,7 @@ button {
   font-size: 10px;
   font-weight: 700;
   line-height: 1;
-  padding: 3px 6px;
+  padding: 3px 5px;
   cursor: pointer;
   border-radius: 6px;
   transition: background 0.15s, color 0.15s;
@@ -596,7 +596,7 @@ button {
 .pref-name {
   font-weight: 700;
   font-size: 13px;
-  padding-right: 44px;
+  padding-right: 30px;
 }
 
 .pref-progress {
