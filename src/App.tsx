@@ -4,7 +4,7 @@ import PlayScreen, { type MuniResult, type RunResult } from "./components/PlaySc
 import ResultScreen from "./components/ResultScreen";
 import SettingsMenu from "./components/SettingsMenu";
 import PrefAtlas from "./components/PrefAtlas";
-import { loadSave, persistSave, type SaveData } from "./lib/storage";
+import { loadSave, persistSave, todayISO, type SaveData } from "./lib/storage";
 import { useSettings } from "./lib/settings";
 
 type View =
@@ -62,14 +62,14 @@ export default function App() {
       const prevBest = save.prefBest[r.prefId];
       // ベストタイムは全市町村ノーミスで打ち切ったときのみ記録
       const perfect = r.miss === 0;
-      const isBest = perfect && (prevBest === undefined || r.totalMs < prevBest);
+      const isBest = perfect && (prevBest === undefined || r.totalMs < prevBest.ms);
       if (isBest) {
         update((d) => ({
           ...d,
-          prefBest: { ...d.prefBest, [r.prefId]: r.totalMs },
+          prefBest: { ...d.prefBest, [r.prefId]: { ms: r.totalMs, date: todayISO() } },
         }));
       }
-      setView({ t: "result", result: r, isBest, best: isBest ? r.totalMs : prevBest });
+      setView({ t: "result", result: r, isBest, best: isBest ? r.totalMs : prevBest?.ms });
     },
     [save.prefBest, update]
   );

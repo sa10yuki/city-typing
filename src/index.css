@@ -389,6 +389,46 @@ button {
   text-decoration: underline;
 }
 
+.updates {
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 14px;
+  padding: 10px 24px;
+  margin: 0 auto 14px;
+  max-width: 760px;
+}
+
+.updates h2 {
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: var(--accent);
+}
+
+.updates ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.updates li {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+  padding: 2px 0;
+}
+
+.update-date {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--text-sub);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .rules {
   background: #fff;
   border: 1px solid var(--border);
@@ -647,6 +687,12 @@ button {
 .pref-best {
   font-size: 11px;
   color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.pref-best-date {
+  font-size: 9px;
+  color: var(--text-sub);
   font-variant-numeric: tabular-nums;
 }
 

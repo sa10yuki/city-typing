@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { munisByPref, muniByCode, prefName, prefs, TOTAL_MUNIS } from "../lib/data";
 import { useSettings } from "../lib/settings";
-import { formatMs, type SaveData } from "../lib/storage";
+import { formatDate, formatMs, type SaveData } from "../lib/storage";
+import { UPDATES } from "../lib/updates";
 import MuniMap from "./MuniMap";
 
 interface Props {
@@ -24,7 +25,7 @@ export default function Home({ save, onSelectPref, onOpenAtlas }: Props) {
 
   // 日本スコア = 記録済み都道府県のベストタイム合計
   const bestEntries = Object.values(save.prefBest);
-  const totalScore = bestEntries.reduce((a, b) => a + b, 0);
+  const totalScore = bestEntries.reduce((a, b) => a + b.ms, 0);
   const recordedPrefs = bestEntries.length;
 
   const [hoverPref, setHoverPref] = useState<number | null>(null);
@@ -83,6 +84,18 @@ export default function Home({ save, onSelectPref, onOpenAtlas }: Props) {
         </p>
       </header>
 
+      <div className="updates">
+        <h2>📢 更新情報</h2>
+        <ul>
+          {UPDATES.slice(0, 5).map((u, i) => (
+            <li key={i}>
+              <span className="update-date">{u.date}</span>
+              <span className="update-text">{u.text}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
       <div className="rules">
         <h2>遊び方</h2>
         <ul>
@@ -135,7 +148,12 @@ export default function Home({ save, onSelectPref, onOpenAtlas }: Props) {
                   <span className="pref-progress">
                     {cleared}/{list.length}
                   </span>
-                  <span className="pref-best">{best ? formatMs(best) : "--:--.--"}</span>
+                  <span className="pref-best">{best ? formatMs(best.ms) : "--:--.--"}</span>
+                  {best?.date && (
+                    <span className="pref-best-date" title={`記録日: ${formatDate(best.date)}`}>
+                      {formatDate(best.date)}
+                    </span>
+                  )}
                 </button>
                 <button
                   className="pref-atlas-btn"
