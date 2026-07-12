@@ -404,7 +404,7 @@ button {
 .pref-list {
   flex: 0 0 380px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 8px;
   max-height: 640px;
   overflow-y: auto;
@@ -413,12 +413,12 @@ button {
 
 .pref-card {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  flex-direction: column;
+  gap: 2px;
   border: 1px solid var(--border);
   background: #fff;
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   cursor: pointer;
   text-align: left;
   transition: border-color 0.15s, background 0.15s;
@@ -436,12 +436,11 @@ button {
 
 .pref-name {
   font-weight: 700;
-  font-size: 14px;
-  flex: 1;
+  font-size: 13px;
 }
 
 .pref-progress {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-sub);
 }
 
@@ -588,32 +587,43 @@ button {
 
 /* ---------- 日本スコア ---------- */
 .japan-score {
-  margin: 16px auto 0;
-  max-width: 480px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
+  margin: 12px auto 0;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
   background: var(--accent-soft);
-  border-radius: 12px;
-  padding: 12px 18px;
+  border-radius: 999px;
+  padding: 5px 16px;
 }
 
 .score-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-sub);
 }
 
 .score-value {
-  font-size: 30px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
 }
 
 .score-sub {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+.settings-hint {
+  margin: 12px auto 0;
+  max-width: 620px;
   font-size: 12px;
   color: var(--text-sub);
+  line-height: 1.6;
+}
+
+.settings-hint b {
+  color: var(--accent);
 }
 
 .counter {

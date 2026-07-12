@@ -64,7 +64,8 @@ export function playMiss(): void {
     const gain = c.createGain();
     osc.type = "sawtooth";
     osc.frequency.value = 140;
-    gain.gain.setValueAtTime(0.16 * typeVolume, t);
+    // 正打鍵音と同じ音量に合わせる
+    gain.gain.setValueAtTime(0.55 * typeVolume, t);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
     osc.connect(gain).connect(c.destination);
     osc.start(t);
