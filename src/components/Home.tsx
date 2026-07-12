@@ -1,5 +1,5 @@
-import { useCallback } from "react";
-import { munisByPref, muniByCode, prefs, TOTAL_MUNIS } from "../lib/data";
+import { useCallback, useEffect, useState } from "react";
+import { munisByPref, muniByCode, prefName, prefs, TOTAL_MUNIS } from "../lib/data";
 import { formatMs, type SaveData } from "../lib/storage";
 import MuniMap from "./MuniMap";
 
@@ -25,14 +25,32 @@ export default function Home({ save, onSelectPref, onOpenAtlas }: Props) {
   const totalScore = bestEntries.reduce((a, b) => a + b, 0);
   const recordedPrefs = bestEntries.length;
 
+  const [hoverPref, setHoverPref] = useState<number | null>(null);
+  const [menu, setMenu] = useState<{ prefId: number; x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (!menu) return;
+    const close = () => setMenu(null);
+    window.addEventListener("mousedown", close);
+    window.addEventListener("scroll", close, true);
+    return () => {
+      window.removeEventListener("mousedown", close);
+      window.removeEventListener("scroll", close, true);
+    };
+  }, [menu]);
+
   const getFill = useCallback(
     (code: string | null) => {
       if (!code) return COLOR_NULL;
-      const h = prefHue(Number(code.slice(0, 2)));
-      // 制覇済み: くっきり、未制覇: 淡い同系色
-      return save.cleared[code] ? `hsl(${h} 62% 55%)` : `hsl(${h} 40% 90%)`;
+      const pid = Number(code.slice(0, 2));
+      const h = prefHue(pid);
+      const hovered = pid === hoverPref;
+      const cleared = !!save.cleared[code];
+      // ホバー中の県は明るく強調
+      if (cleared) return hovered ? `hsl(${h} 78% 48%)` : `hsl(${h} 62% 55%)`;
+      return hovered ? `hsl(${h} 65% 78%)` : `hsl(${h} 40% 90%)`;
     },
-    [save.cleared]
+    [save.cleared, hoverPref]
   );
 
   const getTitle = useCallback((code: string) => {
@@ -75,6 +93,9 @@ export default function Home({ save, onSelectPref, onOpenAtlas }: Props) {
           <li>
             <b>ノーミス</b>で都道府県内の市町村を全部打ち切ると<b>ベストタイム</b>を記録。全国1,741市区町村の完全制覇を目指そう🗾
           </li>
+          <li>
+            各県の<b>🗺地図</b>ボタンで、その県の市区町村を地図帳のように一覧できるよ（クリックで読み上げ・拡大縮小もOK）。
+          </li>
         </ul>
       </div>
 
@@ -85,9 +106,12 @@ export default function Home({ save, onSelectPref, onOpenAtlas }: Props) {
             height={600}
             getFill={getFill}
             getTitle={getTitle}
-            onClickMuni={(code) => onSelectPref(Number(code.slice(0, 2)))}
+            onHoverPref={setHoverPref}
+            onClickMuni={(code, e) =>
+              setMenu({ prefId: Number(code.slice(0, 2)), x: e.clientX, y: e.clientY })
+            }
           />
-          <p className="map-hint">地図をクリックしても都道府県を選べるよ</p>
+          <p className="map-hint">地図の都道府県をクリックすると選べるよ</p>
         </div>
 
         <div className="pref-list">
@@ -110,13 +134,39 @@ export default function Home({ save, onSelectPref, onOpenAtlas }: Props) {
                   title={`${p.name}の市区町村を地図で見る`}
                   onClick={() => onOpenAtlas(p.id)}
                 >
-                  🗺
+                  🗺 地図
                 </button>
               </div>
             );
           })}
         </div>
       </div>
+
+      {menu && (
+        <div
+          className="pref-menu"
+          style={{ left: menu.x, top: menu.y }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <div className="pref-menu-title">{prefName(menu.prefId)}</div>
+          <button
+            onClick={() => {
+              setMenu(null);
+              onSelectPref(menu.prefId);
+            }}
+          >
+            ⌨️ タイピングする
+          </button>
+          <button
+            onClick={() => {
+              setMenu(null);
+              onOpenAtlas(menu.prefId);
+            }}
+          >
+            🗺 市区町村の一覧を見る
+          </button>
+        </div>
+      )}
 
       <footer className="credits">
         <p>

@@ -1,4 +1,4 @@
-import { useId, useMemo } from "react";
+import { useId, useMemo, type MouseEvent as ReactMouseEvent } from "react";
 import { feature } from "topojson-client";
 import type { Topology, GeometryCollection } from "topojson-specification";
 import { geoArea, geoMercator, geoPath } from "d3-geo";
@@ -44,7 +44,7 @@ export interface MuniMapProps {
   height: number;
   /** 市区町村コード→塗り色 */
   getFill: (code: string | null) => string;
-  onClickMuni?: (code: string) => void;
+  onClickMuni?: (code: string, e: ReactMouseEvent) => void;
   /** ポリゴンにtitle（市区町村名）を付けるための解決関数 */
   getTitle?: (code: string) => string | undefined;
   /** 強調表示する市区町村コード（出題中のお題など） */
@@ -55,6 +55,8 @@ export interface MuniMapProps {
   labels?: boolean;
   /** ラベル文字列を返す関数 */
   getLabel?: (code: string) => string | undefined;
+  /** 都道府県ホバー通知（トップ地図用）。prefId(1-47) or null */
+  onHoverPref?: (prefId: number | null) => void;
 }
 
 interface PathEntry {
@@ -74,6 +76,7 @@ export default function MuniMap({
   terrain = false,
   labels = false,
   getLabel,
+  onHoverPref,
 }: MuniMapProps) {
   const clipId = useId();
   const { paths, lakePaths, labelPos, pathGen, tiles, tileScale, tileTranslate } = useMemo(() => {
@@ -153,6 +156,7 @@ export default function MuniMap({
       className="muni-map"
       role="img"
       aria-label={prefId ? "都道府県地図" : "日本地図"}
+      onMouseLeave={onHoverPref ? () => onHoverPref(null) : undefined}
     >
       {paths.map((p, i) => (
         <path
@@ -162,7 +166,10 @@ export default function MuniMap({
           stroke="#cbd5e1"
           strokeWidth={0.4}
           style={onClickMuni && p.code ? { cursor: "pointer" } : undefined}
-          onClick={p.code && onClickMuni ? () => onClickMuni(p.code!) : undefined}
+          onClick={p.code && onClickMuni ? (e) => onClickMuni(p.code!, e) : undefined}
+          onMouseEnter={
+            onHoverPref && p.code ? () => onHoverPref(Number(p.code!.slice(0, 2))) : undefined
+          }
         >
           {p.code && getTitle?.(p.code) ? <title>{getTitle(p.code)}</title> : null}
         </path>

@@ -412,6 +412,7 @@ button {
   align-items: center;
   gap: 16px;
   margin-bottom: 8px;
+  padding-right: 120px; /* 右上固定の設定ボタンを避ける */
 }
 
 .atlas-header h2 {
@@ -425,6 +426,10 @@ button {
   font-weight: 400;
 }
 
+.atlas-play {
+  white-space: nowrap;
+}
+
 .atlas-hint {
   color: var(--text-sub);
   font-size: 12px;
@@ -432,14 +437,56 @@ button {
 }
 
 .atlas-map {
+  position: relative;
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
   background: #f8fafc;
 }
 
-.atlas-map .muni-map {
+.atlas-viewport {
+  overflow: hidden;
+}
+
+.atlas-stage {
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.atlas-stage .muni-map {
+  cursor: inherit;
+}
+
+.atlas-zoom {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.atlas-zoom button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
+  color: var(--text);
+}
+
+.atlas-zoom button:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.atlas-zoom-reset {
+  font-size: 16px !important;
 }
 
 .map-hint {
@@ -448,10 +495,47 @@ button {
   font-size: 12px;
 }
 
+.pref-menu {
+  position: fixed;
+  z-index: 60;
+  transform: translate(-50%, 10px);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
+  padding: 8px;
+  min-width: 200px;
+}
+
+.pref-menu-title {
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+  padding: 4px 0 8px;
+  color: var(--accent);
+}
+
+.pref-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.pref-menu button:hover {
+  background: var(--accent-soft);
+}
+
 .pref-list {
-  flex: 1 1 540px;
+  flex: 1 1 460px;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 7px;
   max-height: 640px;
   overflow-y: auto;
@@ -490,27 +574,29 @@ button {
 
 .pref-atlas-btn {
   position: absolute;
-  top: 3px;
-  right: 3px;
-  border: none;
-  background: transparent;
-  font-size: 13px;
+  top: 4px;
+  right: 4px;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
   line-height: 1;
-  padding: 2px;
+  padding: 3px 6px;
   cursor: pointer;
-  opacity: 0.55;
-  border-radius: 5px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
 }
 
 .pref-atlas-btn:hover {
-  opacity: 1;
-  background: #fff;
+  background: var(--accent);
+  color: #fff;
 }
 
 .pref-name {
   font-weight: 700;
   font-size: 13px;
-  padding-right: 16px;
+  padding-right: 44px;
 }
 
 .pref-progress {

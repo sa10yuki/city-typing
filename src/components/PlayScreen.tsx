@@ -86,6 +86,12 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
         onQuit();
         return;
       }
+      // スペースで一時停止/再開
+      if (e.key === " " || e.code === "Space") {
+        e.preventDefault();
+        togglePause();
+        return;
+      }
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const ch = e.key.length === 1 ? e.key.toLowerCase() : "";
       if (!/^[a-z-]$/.test(ch)) return;
@@ -148,7 +154,7 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
       }
       setTick((t) => t + 1);
     },
-    [queue, prefId, onMuniCleared, onFinish, onQuit]
+    [queue, prefId, onMuniCleared, onFinish, onQuit, togglePause]
   );
 
   useEffect(() => {
@@ -199,8 +205,10 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
           className="btn-pause"
           onClick={togglePause}
           disabled={!started || finishedRef.current}
+          title="スペースキーでも一時停止/再開できます"
         >
           {paused ? "▶ 再開" : "⏸ 一時停止"}
+          <span className="pause-key">Space</span>
         </button>
       </div>
 
