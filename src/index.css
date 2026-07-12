@@ -635,8 +635,16 @@ button {
 }
 
 .pref-card.done {
-  background: var(--accent-soft);
-  border-color: var(--accent);
+  background: #fef3c7;
+  border-color: #d97706;
+}
+
+.pref-card.done .pref-name {
+  color: #92400e;
+}
+
+.pref-card.done .pref-best {
+  color: #b45309;
 }
 
 .pref-card-main {
