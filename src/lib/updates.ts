@@ -5,5 +5,5 @@ export interface UpdateEntry {
 }
 
 export const UPDATES: UpdateEntry[] = [
-  { date: "2026/7/13", text: "ゲームモードをHARDとEASYで切り替えられるようにしました" },
+  { date: "2026/7/13", text: "ゲームモードがHARDとEASYで切り替えられるようになりました" },
 ];
