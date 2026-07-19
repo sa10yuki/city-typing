@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { updateSettings, useSettings, type GameMode, type Layout, type TypeSoundKind } from "../lib/settings";
+import {
+  updateSettings,
+  useSettings,
+  type GameMode,
+  type Layout,
+  type MissSoundKind,
+  type TypeSoundKind,
+} from "../lib/settings";
 import { previewVoice, VOICE_OPTIONS } from "../lib/speech";
-import { previewTypeSound } from "../lib/sound";
+import { previewMissSound, previewTypeSound } from "../lib/sound";
 import { clearRecords } from "../lib/storage";
 
 const LAYOUTS: { id: Layout; label: string; icon: string }[] = [
@@ -22,6 +29,14 @@ const TYPE_SOUND_KINDS: { id: TypeSoundKind; label: string }[] = [
   { id: "pop", label: "ポップ" },
   { id: "typewriter", label: "タイプライター" },
   { id: "chime", label: "チャイム" },
+];
+
+const MISS_SOUND_KINDS: { id: MissSoundKind; label: string }[] = [
+  { id: "buzz", label: "ブザー" },
+  { id: "thud", label: "こつん" },
+  { id: "beep", label: "ビープ" },
+  { id: "dissonant", label: "不協和音" },
+  { id: "droop", label: "ずっこけ" },
 ];
 
 export default function SettingsMenu() {
@@ -108,6 +123,33 @@ export default function SettingsMenu() {
                   className="btn ghost try"
                   disabled={!s.typeSound}
                   onClick={() => previewTypeSound(s.typeSoundKind)}
+                >
+                  ▶
+                </button>
+              </div>
+            </div>
+            <div className="row sub">
+              <span>ミス音</span>
+              <div className="voice-controls">
+                <select
+                  value={s.missSoundKind}
+                  disabled={!s.typeSound}
+                  onChange={(e) => {
+                    const kind = e.target.value as MissSoundKind;
+                    updateSettings({ missSoundKind: kind });
+                    previewMissSound(kind);
+                  }}
+                >
+                  {MISS_SOUND_KINDS.map((k) => (
+                    <option key={k.id} value={k.id}>
+                      {k.label}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  className="btn ghost try"
+                  disabled={!s.typeSound}
+                  onClick={() => previewMissSound(s.missSoundKind)}
                 >
                   ▶
                 </button>

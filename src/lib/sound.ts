@@ -1,5 +1,5 @@
 // Web Audio APIで合成するタイプ音（音声ファイル不要）
-import { getSettings, type TypeSoundKind } from "./settings";
+import { getSettings, type MissSoundKind, type TypeSoundKind } from "./settings";
 
 let ctx: AudioContext | null = null;
 
@@ -146,24 +146,102 @@ export function previewTypeSound(kind: TypeSoundKind): void {
   }
 }
 
-/** ミス音: 低い短いブザー（音色に関わらず共通） */
+/** ブザー: 低い短いブザー（従来のミス音） */
+function buzz(c: AudioContext, t: number, vol: number): void {
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  osc.type = "sawtooth";
+  osc.frequency.value = 140;
+  gain.gain.setValueAtTime(0.55 * vol, t);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+  osc.connect(gain).connect(c.destination);
+  osc.start(t);
+  osc.stop(t + 0.11);
+}
+
+/** こつん: 低く鈍い打撃音 */
+function thud(c: AudioContext, t: number, vol: number): void {
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(90, t);
+  osc.frequency.exponentialRampToValueAtTime(50, t + 0.05);
+  gain.gain.setValueAtTime(0.6 * vol, t);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+  osc.connect(gain).connect(c.destination);
+  osc.start(t);
+  osc.stop(t + 0.1);
+}
+
+/** ビープ: 短い電子音の警告ビープ */
+function beep(c: AudioContext, t: number, vol: number): void {
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  osc.type = "square";
+  osc.frequency.value = 300;
+  gain.gain.setValueAtTime(0.32 * vol, t);
+  gain.gain.setValueAtTime(0.32 * vol, t + 0.06);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+  osc.connect(gain).connect(c.destination);
+  osc.start(t);
+  osc.stop(t + 0.1);
+}
+
+/** 不協和音: 半音違いの2音を重ねた、はっきり「違う」感のある音 */
+function dissonant(c: AudioContext, t: number, vol: number): void {
+  for (const f of [220, 233]) {
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = "triangle";
+    osc.frequency.value = f;
+    gain.gain.setValueAtTime(0.3 * vol, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+    osc.connect(gain).connect(c.destination);
+    osc.start(t);
+    osc.stop(t + 0.14);
+  }
+}
+
+/** ずっこけ: ピッチがすとんと下がる、コミカルな不正解音 */
+function droop(c: AudioContext, t: number, vol: number): void {
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(480, t);
+  osc.frequency.exponentialRampToValueAtTime(180, t + 0.14);
+  gain.gain.setValueAtTime(0.4 * vol, t);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+  osc.connect(gain).connect(c.destination);
+  osc.start(t);
+  osc.stop(t + 0.17);
+}
+
+const MISS_SOUND_FN: Record<MissSoundKind, (c: AudioContext, t: number, vol: number) => void> = {
+  buzz,
+  thud,
+  beep,
+  dissonant,
+  droop,
+};
+
+/** ミス音: 設定中の音色を鳴らす */
 export function playMiss(): void {
-  const { typeSound, typeVolume } = getSettings();
+  const { typeSound, typeVolume, missSoundKind } = getSettings();
   if (!typeSound) return;
   try {
     const c = audio();
-    const t = c.currentTime;
-    const osc = c.createOscillator();
-    const gain = c.createGain();
-    osc.type = "sawtooth";
-    osc.frequency.value = 140;
-    // 正打鍵音と同じ音量に合わせる
-    gain.gain.setValueAtTime(0.55 * typeVolume, t);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
-    osc.connect(gain).connect(c.destination);
-    osc.start(t);
-    osc.stop(t + 0.11);
+    MISS_SOUND_FN[missSoundKind](c, c.currentTime, typeVolume);
   } catch {
     // 音が出せない環境では黙って続行
+  }
+}
+
+/** 指定したミス音の音色を試聴する（設定のON/OFFに関わらず鳴らす） */
+export function previewMissSound(kind: MissSoundKind): void {
+  try {
+    const c = audio();
+    MISS_SOUND_FN[kind](c, c.currentTime, getSettings().typeVolume);
+  } catch {
+    // noop
   }
 }

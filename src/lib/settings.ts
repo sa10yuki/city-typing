@@ -13,11 +13,16 @@ export type GameMode = "easy" | "hard";
 /** タイプ音の音色 */
 export type TypeSoundKind = "mechanical" | "soft" | "pop" | "typewriter" | "chime";
 
+/** ミス音の音色 */
+export type MissSoundKind = "buzz" | "thud" | "beep" | "dissonant" | "droop";
+
 export interface Settings {
   /** タイプ音・ミス音を鳴らすか */
   typeSound: boolean;
   /** タイプ音の音色 */
   typeSoundKind: TypeSoundKind;
+  /** ミス音の音色 */
+  missSoundKind: MissSoundKind;
   /** タイプ音の音量 0..1 */
   typeVolume: number;
   /** 市町村名を読み上げるか */
@@ -46,6 +51,7 @@ const OLD_VOICE_KEY = "city-typing-voice";
 const DEFAULTS: Settings = {
   typeSound: true,
   typeSoundKind: "mechanical",
+  missSoundKind: "buzz",
   typeVolume: 0.6,
   voiceEnabled: true,
   voiceVolume: 1.0,
