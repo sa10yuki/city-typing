@@ -10,9 +10,14 @@ export type Layout = "map-left" | "map-right" | "map-top" | "focus";
  */
 export type GameMode = "easy" | "hard";
 
+/** タイプ音の音色 */
+export type TypeSoundKind = "mechanical" | "soft" | "pop" | "typewriter" | "chime";
+
 export interface Settings {
   /** タイプ音・ミス音を鳴らすか */
   typeSound: boolean;
+  /** タイプ音の音色 */
+  typeSoundKind: TypeSoundKind;
   /** タイプ音の音量 0..1 */
   typeVolume: number;
   /** 市町村名を読み上げるか */
@@ -40,6 +45,7 @@ const OLD_VOICE_KEY = "city-typing-voice";
 
 const DEFAULTS: Settings = {
   typeSound: true,
+  typeSoundKind: "mechanical",
   typeVolume: 0.6,
   voiceEnabled: true,
   voiceVolume: 1.0,

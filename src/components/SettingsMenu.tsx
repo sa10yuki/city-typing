@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { updateSettings, useSettings, type GameMode, type Layout } from "../lib/settings";
+import { updateSettings, useSettings, type GameMode, type Layout, type TypeSoundKind } from "../lib/settings";
 import { previewVoice, VOICE_OPTIONS } from "../lib/speech";
+import { previewTypeSound } from "../lib/sound";
 import { clearRecords } from "../lib/storage";
 
 const LAYOUTS: { id: Layout; label: string; icon: string }[] = [
@@ -13,6 +14,14 @@ const LAYOUTS: { id: Layout; label: string; icon: string }[] = [
 const GAME_MODES: { id: GameMode; label: string; desc: string }[] = [
   { id: "hard", label: "HARD", desc: "制覇済みでもミスすると外れる" },
   { id: "easy", label: "EASY", desc: "一度制覇したら外れない" },
+];
+
+const TYPE_SOUND_KINDS: { id: TypeSoundKind; label: string }[] = [
+  { id: "mechanical", label: "メカニカル" },
+  { id: "soft", label: "ソフト" },
+  { id: "pop", label: "ポップ" },
+  { id: "typewriter", label: "タイプライター" },
+  { id: "chime", label: "チャイム" },
 ];
 
 export default function SettingsMenu() {
@@ -77,6 +86,33 @@ export default function SettingsMenu() {
                 onChange={(e) => updateSettings({ typeSound: e.target.checked })}
               />
             </label>
+            <div className="row sub">
+              <span>音色</span>
+              <div className="voice-controls">
+                <select
+                  value={s.typeSoundKind}
+                  disabled={!s.typeSound}
+                  onChange={(e) => {
+                    const kind = e.target.value as TypeSoundKind;
+                    updateSettings({ typeSoundKind: kind });
+                    previewTypeSound(kind);
+                  }}
+                >
+                  {TYPE_SOUND_KINDS.map((k) => (
+                    <option key={k.id} value={k.id}>
+                      {k.label}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  className="btn ghost try"
+                  disabled={!s.typeSound}
+                  onClick={() => previewTypeSound(s.typeSoundKind)}
+                >
+                  ▶
+                </button>
+              </div>
+            </div>
             <label className="row sub">
               <span>音量</span>
               <input
