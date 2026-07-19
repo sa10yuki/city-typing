@@ -5,5 +5,6 @@ export interface UpdateEntry {
 }
 
 export const UPDATES: UpdateEntry[] = [
+  { date: "2026/7/13", text: "タイピング画面の地図・市町村名・キーボードの大きさを設定で調整できるようになりました" },
   { date: "2026/7/13", text: "ゲームモードがHARDとEASYで切り替えられるようになりました" },
 ];

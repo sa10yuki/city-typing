@@ -27,6 +27,12 @@ export interface Settings {
   showKeyboard: boolean;
   /** ゲームモード（EASY/HARD） */
   gameMode: GameMode;
+  /** タイピング画面: 地図エリアの拡大率 */
+  mapSize: number;
+  /** タイピング画面: 市町村名エリアの拡大率 */
+  questionSize: number;
+  /** タイピング画面: キーボードエリアの拡大率 */
+  keyboardSize: number;
 }
 
 const KEY = "city-typing-settings";
@@ -41,6 +47,9 @@ const DEFAULTS: Settings = {
   layout: "map-left",
   showKeyboard: true,
   gameMode: "hard",
+  mapSize: 1,
+  questionSize: 1,
+  keyboardSize: 1,
 };
 
 function load(): Settings {

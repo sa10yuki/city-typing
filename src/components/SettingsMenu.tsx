@@ -167,6 +167,61 @@ export default function SettingsMenu() {
           </section>
 
           <section>
+            <div className="row">
+              <span>各エリアの大きさ</span>
+              <button
+                className="size-reset"
+                onClick={() => updateSettings({ mapSize: 1, questionSize: 1, keyboardSize: 1 })}
+              >
+                リセット
+              </button>
+            </div>
+            <label className="row sub">
+              <span>地図</span>
+              <span className="size-controls">
+                <input
+                  type="range"
+                  min={0.6}
+                  max={1.5}
+                  step={0.05}
+                  value={s.mapSize}
+                  onChange={(e) => updateSettings({ mapSize: Number(e.target.value) })}
+                />
+                <span className="size-value">{Math.round(s.mapSize * 100)}%</span>
+              </span>
+            </label>
+            <label className="row sub">
+              <span>市町村名</span>
+              <span className="size-controls">
+                <input
+                  type="range"
+                  min={0.6}
+                  max={1.5}
+                  step={0.05}
+                  value={s.questionSize}
+                  onChange={(e) => updateSettings({ questionSize: Number(e.target.value) })}
+                />
+                <span className="size-value">{Math.round(s.questionSize * 100)}%</span>
+              </span>
+            </label>
+            <label className="row sub">
+              <span>キーボード</span>
+              <span className="size-controls">
+                <input
+                  type="range"
+                  min={0.6}
+                  max={1.5}
+                  step={0.05}
+                  value={s.keyboardSize}
+                  disabled={!s.showKeyboard}
+                  onChange={(e) => updateSettings({ keyboardSize: Number(e.target.value) })}
+                />
+                <span className="size-value">{Math.round(s.keyboardSize * 100)}%</span>
+              </span>
+            </label>
+          </section>
+
+          <section>
             {!confirmReset ? (
               <button className="reset-btn" onClick={() => setConfirmReset(true)}>
                 これまでの記録を全て消す

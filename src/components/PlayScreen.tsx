@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { munisByPref, prefName, shuffle, type Muni } from "../lib/data";
 import { TypingChallenge } from "../lib/romaji";
 import { playMiss, playType } from "../lib/sound";
@@ -36,7 +36,7 @@ const COLOR_CURRENT = "#f59e0b";
 const COLOR_IDLE = "#e2e8f0";
 
 export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish, onQuit }: Props) {
-  const { layout, showKeyboard } = useSettings();
+  const { layout, showKeyboard, mapSize, questionSize, keyboardSize } = useSettings();
   const queue = useMemo<Muni[]>(() => shuffle(munisByPref.get(prefId) ?? []), [prefId]);
   // ゲーム進行はすべてrefで持つ（高速連打時にレンダー待ちの古いstateを掴まないため）
   const idxRef = useRef(0);
@@ -212,7 +212,16 @@ export default function PlayScreen({ prefId, clearedAll, onMuniCleared, onFinish
         </button>
       </div>
 
-      <div className={`play-body layout-${layout}`}>
+      <div
+        className={`play-body layout-${layout}`}
+        style={
+          {
+            "--map-scale": mapSize,
+            "--q-scale": questionSize,
+            "--kbd-scale": keyboardSize,
+          } as CSSProperties
+        }
+      >
         {layout !== "focus" && (
           <div className="play-map">
             <MuniMap

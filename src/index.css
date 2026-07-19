@@ -200,6 +200,38 @@ button {
   width: 150px;
 }
 
+.size-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.size-controls input[type="range"] {
+  width: 110px;
+}
+
+.size-value {
+  font-size: 11px;
+  color: var(--text-sub);
+  font-variant-numeric: tabular-nums;
+  width: 34px;
+  text-align: right;
+}
+
+.size-reset {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.size-reset:hover {
+  text-decoration: underline;
+}
+
 .settings-panel input[type="checkbox"] {
   width: 18px;
   height: 18px;
@@ -772,8 +804,8 @@ button {
 }
 
 .play-question-col {
-  flex: 0 0 400px;
-  max-width: 400px;
+  flex: 0 0 calc(400px * var(--q-scale, 1));
+  max-width: calc(400px * var(--q-scale, 1));
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -788,30 +820,33 @@ button {
 .kbd {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: calc(5px * var(--kbd-scale, 1));
   align-items: center;
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 10px;
+  padding: calc(10px * var(--kbd-scale, 1));
   user-select: none;
+  max-width: 100%;
+  /* キーボードが列の幅より大きくなる組み合わせでもページを横に壊さない */
+  overflow-x: auto;
 }
 
 .kbd-row {
   display: flex;
-  gap: 5px;
+  gap: calc(5px * var(--kbd-scale, 1));
   justify-content: center;
 }
 
 .kbd-key {
-  width: 28px;
-  height: 28px;
+  width: calc(28px * var(--kbd-scale, 1));
+  height: calc(28px * var(--kbd-scale, 1));
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1.5px solid;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: calc(12px * var(--kbd-scale, 1));
   font-weight: 700;
   transition: transform 0.08s, box-shadow 0.08s;
 }
@@ -821,22 +856,22 @@ button {
 }
 
 .kbd-space {
-  width: 150px;
+  width: calc(150px * var(--kbd-scale, 1));
   background: #f1f5f9;
   border-color: #cbd5e1;
   color: var(--text-sub);
-  font-size: 11px;
+  font-size: calc(11px * var(--kbd-scale, 1));
   font-weight: 600;
 }
 
 @media (max-width: 520px) {
   .kbd-key {
-    width: 26px;
-    height: 26px;
-    font-size: 11px;
+    width: calc(26px * var(--kbd-scale, 1));
+    height: calc(26px * var(--kbd-scale, 1));
+    font-size: calc(11px * var(--kbd-scale, 1));
   }
   .kbd-space {
-    width: 130px;
+    width: calc(130px * var(--kbd-scale, 1));
   }
 }
 
@@ -951,19 +986,19 @@ button {
 
 .play-map {
   flex: 1 1 auto;
-  max-width: 680px;
+  max-width: calc(680px * var(--map-scale, 1));
 }
 
 .layout-map-top .play-map {
   flex: 0 0 auto;
   width: 100%;
-  max-width: 560px;
+  max-width: calc(560px * var(--map-scale, 1));
 }
 
 .layout-map-top .play-question-col,
 .layout-focus .play-question-col {
   flex: 0 0 auto;
-  max-width: 480px;
+  max-width: calc(480px * var(--q-scale, 1));
   width: 100%;
 }
 
@@ -973,9 +1008,9 @@ button {
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 48px 32px;
+  padding: calc(48px * var(--q-scale, 1)) calc(32px * var(--q-scale, 1));
   text-align: center;
-  min-height: 220px;
+  min-height: calc(220px * var(--q-scale, 1));
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -993,13 +1028,13 @@ button {
 }
 
 .q-name {
-  font-size: 44px;
+  font-size: calc(44px * var(--q-scale, 1));
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 .q-suffix {
-  font-size: 26px;
+  font-size: calc(26px * var(--q-scale, 1));
   font-weight: 400;
   color: var(--text-sub);
   margin-left: 8px;
@@ -1007,7 +1042,7 @@ button {
 }
 
 .q-suffix rt {
-  font-size: 12px;
+  font-size: calc(12px * var(--q-scale, 1));
   color: var(--text-sub);
 }
 
@@ -1019,7 +1054,7 @@ button {
 }
 
 .q-kana {
-  font-size: 24px;
+  font-size: calc(24px * var(--q-scale, 1));
   letter-spacing: 0.06em;
 }
 
@@ -1037,7 +1072,7 @@ button {
 }
 
 .q-romaji {
-  font-size: 18px;
+  font-size: calc(18px * var(--q-scale, 1));
   letter-spacing: 0.1em;
   font-family: Consolas, "Courier New", monospace;
 }
@@ -1186,7 +1221,7 @@ button {
   .play-map {
     flex: 1;
     width: 100%;
-    max-width: 470px;
+    max-width: calc(470px * var(--map-scale, 1));
     margin: 0 auto;
   }
 }
